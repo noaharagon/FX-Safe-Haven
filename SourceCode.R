@@ -19,3 +19,7 @@ stable_coins = read_excel("FXData.xlsx", sheet='StableCoins')
 
 independent_vars = read_excel("FXData.xlsx", sheet='IndependentVars')
 spreads = read_excel("FXData.xlsx", sheet='Spreads')
+
+
+#We need to match dates between the columns and impute missing data for the dailys
+#Probably use just yesterday's value?
