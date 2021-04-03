@@ -6,6 +6,7 @@
 library("readxl")
 library("dplyr")
 library("purrr")
+library(stringr)
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice", 
@@ -52,12 +53,25 @@ for (i in df_list){
 }
 
 #Merge All Cols into One
-spot_rates_merged <- lapply(df_list, get) %>% 
+spot_rates_merged <- lapply(df_list[1:4], get) %>% 
   reduce(left_join, by = "dates")
 
+spot_rates_merged = read.csv('spot_rates.csv')
+
+rm(list=setdiff(ls(), c("spot_rates_merged",'spreads','stable_coins','independent_vars')))
+
+
 #split independent variables by time frequency
+
+#Crossrate
+for (i in c("JAPANESE.YEN.TO.US....WMR....EXCHANGE.RATE",'NORWEGIAN.KRONE.TO.US....WMR....EXCHANGE.RATE', 
+'BRAZILIAN.REAL.TO.US....WMR....EXCHANGE.RATE', "INDIAN.RUPEE.TO.US....WMR....EXCHANGE.RATE")) { 
+  spot_rates_merged[paste(str_split(i, "US", simplify = T)[1] ,"CHF",str_split(i, "US..", simplify = T)[2],sep="")][1:which(grepl("2003-07-14", spot_rates_merged$dates)),] = 
+    (1/spot_rates_merged["SWISS.FRANC.TO.US....WMR....EXCHANGE.RATE"][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])*
+    (spot_rates_merged[i][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])}
 
 
 # Data Visualization ------------------------------------------------------
 
 
+# Finite Gaussian Mixture  ------------------------------------------------
