@@ -52,7 +52,7 @@ for (i in df_list){
 }
 
 #Merge All Cols into One
-spot_rates_merged <- list(spot_rates_cleaned, lapply(df_list, get)) %>% 
+spot_rates_merged <- lapply(df_list, get) %>% 
   reduce(left_join, by = "dates")
 
 #split independent variables by time frequency
