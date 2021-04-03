@@ -7,6 +7,7 @@ library("readxl")
 library("dplyr")
 library("purrr")
 library(stringr)
+library(xts)
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice", 
@@ -63,13 +64,16 @@ rm(list=setdiff(ls(), c("spot_rates_merged",'spreads','stable_coins','independen
 
 #split independent variables by time frequency
 
-#Crossrate
+#Crossrates
 for (i in c("JAPANESE.YEN.TO.US....WMR....EXCHANGE.RATE",'NORWEGIAN.KRONE.TO.US....WMR....EXCHANGE.RATE', 
 'BRAZILIAN.REAL.TO.US....WMR....EXCHANGE.RATE', "INDIAN.RUPEE.TO.US....WMR....EXCHANGE.RATE")) { 
   spot_rates_merged[paste(str_split(i, "US", simplify = T)[1] ,"CHF",str_split(i, "US..", simplify = T)[2],sep="")][1:which(grepl("2003-07-14", spot_rates_merged$dates)),] = 
     (1/spot_rates_merged["SWISS.FRANC.TO.US....WMR....EXCHANGE.RATE"][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])*
     (spot_rates_merged[i][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])}
+rm(i)
 
+#fill in missing values with previous value
+spot_rates_merged = na.locf(spot_rates_merged)
 
 # Data Visualization ------------------------------------------------------
 
