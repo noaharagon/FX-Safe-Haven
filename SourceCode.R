@@ -9,6 +9,7 @@ library("purrr")
 library(stringr)
 library(xts)
 
+
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice", 
           "/Users/noahangara/Documents/Master's/8th Semester/Economics in Practice")
@@ -35,7 +36,7 @@ spot_rates[,seq(1, ncol(spot_rates), 2)] <- lapply(spot_rates[,seq(1, ncol(spot_
 
 
 #reverse order of some columns to make chronologically
-spot_rates[,22:ncol(spot_rates)] <- spot_rates[nrow(spot_rates):1, 22:ncol(spot_rates)]
+spot_rates[,23:ncol(spot_rates)] <- spot_rates[nrow(spot_rates):1, 23:ncol(spot_rates)]
 independent_vars[,35:ncol(independent_vars)] <- independent_vars[nrow(independent_vars):1,35:ncol(independent_vars)]
 
 #Merge all spot rates into one DataFrame with uniform dates
@@ -54,28 +55,32 @@ for (i in df_list){
 }
 
 #Merge All Cols into One
-spot_rates_merged <- lapply(df_list[1:4], get) %>% 
-  reduce(left_join, by = "dates")
-
-spot_rates_merged = read.csv('spot_rates.csv')
+spot_rates_merged <- lapply(df_list, get) %>% 
+  reduce(left_join, by = "dates",na_matches="never")
 
 rm(list=setdiff(ls(), c("spot_rates_merged",'spreads','stable_coins','independent_vars')))
 
-
-#split independent variables by time frequency
-
 #Crossrates
-for (i in c("JAPANESE.YEN.TO.US....WMR....EXCHANGE.RATE",'NORWEGIAN.KRONE.TO.US....WMR....EXCHANGE.RATE', 
-'BRAZILIAN.REAL.TO.US....WMR....EXCHANGE.RATE', "INDIAN.RUPEE.TO.US....WMR....EXCHANGE.RATE")) { 
-  spot_rates_merged[paste(str_split(i, "US", simplify = T)[1] ,"CHF",str_split(i, "US..", simplify = T)[2],sep="")][1:which(grepl("2003-07-14", spot_rates_merged$dates)),] = 
-    (1/spot_rates_merged["SWISS.FRANC.TO.US....WMR....EXCHANGE.RATE"][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])*
+for (i in c("JAPANESE YEN TO US $ (WMR) - EXCHANGE RATE",'NORWEGIAN KRONE TO US $ (WMR) - EXCHANGE RATE',
+            'BRAZILIAN REAL TO US $ (WMR) - EXCHANGE RATE',"INDIAN RUPEE TO US $ (WMR) - EXCHANGE RATE" )) { 
+  spot_rates_merged[paste(str_split(i, "US",simplify = T)[1], "CHF (WMR) - EXCHANGE RATE", sep="")][1:which(grepl("2003-07-14", spot_rates_merged$dates)),] = 
+    (1/spot_rates_merged["SWISS FRANC TO US $ (WMR) - EXCHANGE RATE"][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])*
     (spot_rates_merged[i][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])}
 rm(i)
+spot_rates_merged[,2:ncol(spot_rates_merged)] = sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], as.numeric)
 
 #fill in missing values with previous value
 spot_rates_merged = na.locf(spot_rates_merged)
 
+
+
+
+#split independent variables by time frequency
+daily_independent_vars = independent_vars[,c(1:32,35:36,39:48,57:64)]
+
+
 # Data Visualization ------------------------------------------------------
 
-
 # Finite Gaussian Mixture  ------------------------------------------------
+
+
