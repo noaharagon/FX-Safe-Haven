@@ -3,7 +3,9 @@
 #March 2021
 
 #packages
-library('readxl')
+library("readxl")
+library("dplyr")
+library("purrr")
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice", 
@@ -29,12 +31,31 @@ dates <- seq(as.Date("2000-03-17"), as.Date("2021-03-18"), by = "days")
 spot_rates_cleaned <- data.frame(dates)
 spot_rates[,seq(1, ncol(spot_rates), 2)] <- lapply(spot_rates[,seq(1, ncol(spot_rates), 2)], as.Date, format = "%y-%m-%d")
 
+
 #reverse order of some columns to make chronologically
 spot_rates[,22:ncol(spot_rates)] <- spot_rates[nrow(spot_rates):1, 22:ncol(spot_rates)]
 independent_vars[,35:ncol(independent_vars)] <- independent_vars[nrow(independent_vars):1,35:ncol(independent_vars)]
 
-#treating NA's
-spot_rates[spot_rates == "NA"] <- NA
+#Merge all spot rates into one DataFrame with uniform dates
+currencies <- colnames(spot_rates[, seq(2, ncol(spot_rates), 2)])
+df_list <- list()
+for (i in currencies) {
+  curr <- paste("df", i, sep = ".")
+  assign(curr, spot_rates[,(which(colnames(spot_rates)== i)-1):which(colnames(spot_rates)== i)])
+  df_list[[curr]] <- curr
+}
+#Change Column Names to Dates
+for (i in df_list){
+  d=get(i)
+  colnames(d)[1]= "dates"
+  assign(i,d)
+}
+
+#Merge All Cols into One
+spot_rates_merged <- list(spot_rates_cleaned, lapply(df_list, get)) %>% 
+  reduce(left_join, by = "dates")
+
+#split independent variables by time frequency
 
 
 # Data Visualization ------------------------------------------------------
