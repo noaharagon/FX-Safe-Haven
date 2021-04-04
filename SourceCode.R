@@ -92,7 +92,8 @@ recessions.df = read.table(textConnection(
 1990-07-01, 1991-03-01
 2001-03-01, 2001-11-01
 2007-12-01, 2009-06-01"), sep=',', colClasses=c('Date', 'Date'), header=TRUE)
-recessions.trim = subset(recessions.df, Peak >= min(index(z)))
+recessions.trim = subset(recessions.df, Peak >= "2000-03-17")
+rm(recessions.df)
 
 # Loop to Create Plots of Spot Rates With Recession Shading
 plot_list = list()
@@ -108,7 +109,7 @@ for (i in colnames(spot_rates_merged[2:19])) {
   plot_list[[i]] = g
   ggsave(g, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
 }
-
+rm(c(i,z))
 
 # Finite Gaussian Mixture  ------------------------------------------------
 
