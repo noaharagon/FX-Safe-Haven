@@ -81,6 +81,33 @@ daily_independent_vars = independent_vars[,c(1:32,35:36,39:48,57:64)]
 
 # Data Visualization ------------------------------------------------------
 
+# US Recession Start and End as per FRED St. Louis
+recessions.df = read.table(textConnection(
+  "Peak, Trough
+1973-11-01, 1975-03-01
+1980-01-01, 1980-07-01
+1981-07-01, 1982-11-01
+1990-07-01, 1991-03-01
+2001-03-01, 2001-11-01
+2007-12-01, 2009-06-01"), sep=',', colClasses=c('Date', 'Date'), header=TRUE)
+recessions.trim = subset(recessions.df, Peak >= min(index(z)))
+
+# Loop to Create Plots of Spot Rates With Recession Shading
+plot_list = list()
+for (i in colnames(spot_rates_merged[2:19])) {
+  z = zoo(spot_rates_merged[, i], order.by = spot_rates_merged$dates)
+  g = ggplot(fortify(z,melt=T)) +
+    geom_line(aes(x=Index,y=Value))+ 
+    geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf), fill='red', alpha=0.2)+
+    ylab("Spot Rate") +
+    xlab("Date") +
+    theme_economist_white() +
+    ggtitle(paste("Spot Rate of", i, sep = " "))
+  plot_list[[i]] = g
+  ggsave(g, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
+}
+
+
 # Finite Gaussian Mixture  ------------------------------------------------
 
 
