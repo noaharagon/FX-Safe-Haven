@@ -74,11 +74,40 @@ spot_rates_merged[,2:ncol(spot_rates_merged)] = sapply(spot_rates_merged[,2:ncol
 #fill in missing values with previous value
 spot_rates_merged = na.locf(spot_rates_merged)
 
-
+#compute log returns of spot rates
+difflog = function(x){
+  diff(log(x))}
+spot_rates_merged_returns = as.data.frame(sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], difflog))
 
 
 #split independent variables by time frequency
 daily_independent_vars = independent_vars[,c(1:32,35:36,39:48,57:64)]
+
+#Merge all daily independent variables into one DataFrame with uniform dates
+vars <- colnames(daily_independent_vars[, seq(2, ncol(daily_independent_vars), 2)])
+df_list <- list()
+for (i in vars) {
+  var <- paste("df", i, sep = ".")
+  assign(var, daily_independent_vars[,(which(colnames(daily_independent_vars)== i)-1):which(colnames(daily_independent_vars)== i)])
+  df_list[[var]] <- var }
+
+#Change Column Names to Dates
+for (i in df_list){
+  d=get(i)
+  colnames(d)[1]= "dates"
+  assign(i,d)}
+
+#Merge All Cols into One
+daily_independent_vars_merged <- lapply(df_list, get) %>% 
+  reduce(left_join, by = "dates",na_matches="never")
+
+rm(list=setdiff(ls(),c('daily_independent_vars_merged', 'independent_vars','spot_rates_merged_returns','spreads','stable_coins')))
+
+daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)] = sapply(daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)], as.numeric)
+
+#Should fill in NAs where no NA is preceding, i.e., not for time period where some variable has not started yet
+daily_independent_vars_merged = na.locf(daily_independent_vars_merged, na.rm = F)
+
 
 
 # Data Visualization ------------------------------------------------------
@@ -113,9 +142,24 @@ rm(c(i,z))
 
 # Finite Gaussian Mixture  ------------------------------------------------
 
-difflog = function(x){
-  diff(log(x))}
-spot_rates_merged_returns = as.data.frame(sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], difflog))
 
 
+#EXPERIMENTAL FUNCTION, DOESNT WORK YET
 
+datacleanup = function(data){
+  vars <- colnames(data[, seq(2, ncol(data), 2)])
+  df_list <- list()
+  for (i in vars) {
+    var <- paste("df", i, sep = ".")
+    assign(var, data[,(which(colnames(data)== i)-1):which(colnames(data)== i)])
+    df_list[[var]] <- var }
+  
+  for (i in df_list){
+    d=get(i)
+    colnames(d)[1]= "dates"
+    assign(i,d)}
+  
+  assign(paste("data","_merged",sep=""), lapply(df_list, get) %>% reduce(left_join, by = "dates",na_matches="never"))
+  }
+
+datacleanup(daily_independent_vars)
