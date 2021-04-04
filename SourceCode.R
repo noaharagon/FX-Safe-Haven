@@ -8,7 +8,9 @@ library("dplyr")
 library("purrr")
 library(stringr)
 library(xts)
-
+library(ggplot2)
+library(ggthemes)
+library(zoo)
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice", 
@@ -109,5 +111,10 @@ for (i in colnames(spot_rates_merged[2:19])) {
 
 
 # Finite Gaussian Mixture  ------------------------------------------------
+
+difflog = function(x){
+  diff(log(x))}
+spot_rates_merged_returns = as.data.frame(sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], difflog))
+
 
 
