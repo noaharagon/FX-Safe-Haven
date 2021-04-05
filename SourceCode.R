@@ -11,6 +11,7 @@ library(xts)
 library(ggplot2)
 library(ggthemes)
 library(zoo)
+library("tibble")
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice", 
@@ -32,14 +33,11 @@ spot_rates <- as.data.frame(spot_rates)
 independent_vars <- as.data.frame(independent_vars)
 
 #Dates and Rearranging
-dates <- seq(as.Date("2000-03-17"), as.Date("2021-03-18"), by = "days")
-spot_rates_cleaned <- data.frame(dates)
 spot_rates[,seq(1, ncol(spot_rates), 2)] <- lapply(spot_rates[,seq(1, ncol(spot_rates), 2)], as.Date, format = "%y-%m-%d")
-
 
 #reverse order of some columns to make chronologically
 spot_rates[,23:ncol(spot_rates)] <- spot_rates[nrow(spot_rates):1, 23:ncol(spot_rates)]
-independent_vars[,35:ncol(independent_vars)] <- independent_vars[nrow(independent_vars):1,35:ncol(independent_vars)]
+independent_vars[,c(35:64,69:70)] <- independent_vars[nrow(independent_vars):1,c(35:64,69:70)]
 
 # Function to clean data
 datacleanup <- function(data){
@@ -75,16 +73,24 @@ spot_rates_merged <- na.locf(spot_rates_merged)
 #compute log returns of spot rates
 difflog <- function(x){
   diff(log(x))}
-spot_rates_merged_returns <- as.data.frame(sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], difflog))
+spot_rates_merged_returns <- as.data.frame(sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], difflog), row.names = spot_rates_merged[2:nrow(spot_rates_merged), "dates"])
 
 
 #split independent variables by time frequency
 daily_independent_vars <- independent_vars[,c(1:32,35:36,39:48,57:64)]
-#weekly_independent_vars = independent_vars[, ]
+weekly_independent_vars <- independent_vars[,c(37:38,69:70)]
+monthly_independent_vars <- independent_vars[,c(49:56,65:68)]
+
+#Replace Year Column of Geopolitical Risk with Date Column & Drop Months as Redundant
+monthly_independent_vars[!is.na(monthly_independent_vars[,9]), 9] <- rev(seq(as.Date("1997-01-01"), as.Date("2021-02-01"), by = "months"))
+monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11)]
 
 #Merge all daily independent variables into one DataFrame with uniform dates
 daily_independent_vars_merged <- datacleanup(daily_independent_vars)
-rm(list=setdiff(ls(),c('daily_independent_vars_merged', 'independent_vars','spot_rates_merged_returns','spreads','stable_coins', "datacleanup")))
+weekly_independent_vars_merged <- datacleanup(weekly_independent_vars)
+#monthly_independent_vars <- datacleanup(monthly_independent_vars)
+rm(list=setdiff(ls(),c('daily_independent_vars_merged', 'independent_vars','spot_rates_merged_returns','spreads',
+                       'stable_coins', "datacleanup", "weekly_independent_vars_merged")))
 
 # Convert to numeric
 daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)] <- sapply(daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)], as.numeric)
