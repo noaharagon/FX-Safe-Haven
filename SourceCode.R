@@ -73,8 +73,8 @@ spot_rates_merged <- na.locf(spot_rates_merged)
 #compute log returns of spot rates
 difflog <- function(x){
   diff(log(x))}
-spot_rates_merged_returns <- as.data.frame(sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], difflog), row.names = spot_rates_merged[2:nrow(spot_rates_merged), "dates"])
-
+spot_rates_merged_returns <- as.data.frame(sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], difflog))
+spot_rates_merged_returns$dates <- spot_rates_merged[2:nrow(spot_rates_merged), "dates"]
 
 #split independent variables by time frequency
 daily_independent_vars <- independent_vars[,c(1:32,35:36,39:48,57:64)]
@@ -82,15 +82,18 @@ weekly_independent_vars <- independent_vars[,c(37:38,69:70)]
 monthly_independent_vars <- independent_vars[,c(49:56,65:68)]
 
 #Replace Year Column of Geopolitical Risk with Date Column & Drop Months as Redundant
-monthly_independent_vars[!is.na(monthly_independent_vars[,9]), 9] <- rev(seq(as.Date("1997-01-01"), as.Date("2021-02-01"), by = "months"))
+monthly_independent_vars[!is.na(monthly_independent_vars[,9]), 9] <- rev(seq(as.Date("1997-01-01"), as.Date("2021-01-01"), by = "months"))
+monthly_independent_vars$Year...65 = sort(as.Date(monthly_independent_vars$Year...65), na.last = T)
 monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11)]
 
 #Merge all daily independent variables into one DataFrame with uniform dates
 daily_independent_vars_merged <- datacleanup(daily_independent_vars)
 weekly_independent_vars_merged <- datacleanup(weekly_independent_vars)
+monthly_independent_vars_merged <- datacleanup(monthly_independent_vars)
+
 #monthly_independent_vars <- datacleanup(monthly_independent_vars)
 rm(list=setdiff(ls(),c('daily_independent_vars_merged', 'independent_vars','spot_rates_merged_returns','spreads',
-                       'stable_coins', "datacleanup", "weekly_independent_vars_merged")))
+                       'stable_coins', "datacleanup", "weekly_independent_vars_merged", "monthly_independent_vars_merged")))
 
 # Convert to numeric
 daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)] <- sapply(daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)], as.numeric)
