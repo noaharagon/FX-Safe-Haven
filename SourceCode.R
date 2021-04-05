@@ -101,6 +101,10 @@ daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)] <- sapply(
 #Should fill in NAs where no NA is preceding, i.e., not for time period where some variable has not started yet
 daily_independent_vars_merged <- na.locf(daily_independent_vars_merged, na.rm = F)
 
+#removes rows where NAs across all columns (no date etc.) 
+weekly_independent_vars_merged = weekly_independent_vars_merged[apply(weekly_independent_vars_merged,1,function(x)any(!is.na(x))),]
+monthly_independent_vars_merged = monthly_independent_vars_merged[apply(monthly_independent_vars_merged,1,function(x)any(!is.na(x))),]
+
 
 
 # Data Visualization ------------------------------------------------------
