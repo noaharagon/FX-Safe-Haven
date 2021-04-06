@@ -6,11 +6,11 @@
 library("readxl")
 library("dplyr")
 library("purrr")
-library(stringr)
-library(xts)
-library(ggplot2)
-library(ggthemes)
-library(zoo)
+library("stringr")
+library("xts")
+library("ggplot2")
+library("ggthemes")
+library("zoo")
 library("tibble")
 
 #setting working directory
@@ -66,6 +66,14 @@ for (i in c("JAPANESE YEN TO US $ (WMR) - EXCHANGE RATE",'NORWEGIAN KRONE TO US 
     (spot_rates_merged[i][1:which(grepl("2003-07-14", spot_rates_merged$dates)),])}
 rm(i)
 spot_rates_merged[,2:ncol(spot_rates_merged)] = sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], as.numeric)
+
+#Calculating Bid-Ask Spreads
+spreads_clean <- spreads %>% select(-contains("Date"))
+spreads_clean <- spreads_clean %>% relocate("Ask Price CHF/INR", .after = "Bid Price CHF/INR")
+bid_ask <- spreads_clean[, seq(2, ncol(spreads_clean), 2)] - spreads_clean[, seq(1, ncol(spreads_clean), 2)]
+colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))
+bid_ask$Date <- spreads$Date...1
+rm(spreads, spreads_clean)
 
 #fill in missing values with previous value
 spot_rates_merged <- na.locf(spot_rates_merged)
