@@ -51,7 +51,7 @@ datacleanup <- function(data){
     d=get(i)
     colnames(d)[1]<- "dates"
     assign(i,d, envir = .GlobalEnv)}
-  assign(paste(deparse(substitute(data)),"_merged",sep=""), lapply(df_list, get) %>% reduce(left_join, by = "dates",na_matches="never"))
+  assign(paste(deparse(substitute(data)),"_merged",sep=""), lapply(df_list, get) %>% reduce(full_join, by = "dates",na_matches="never"))
 }
 
 spot_rates_merged <- datacleanup(spot_rates)
@@ -73,7 +73,6 @@ spreads_clean <- spreads_clean %>% relocate("Ask Price CHF/INR", .after = "Bid P
 bid_ask <- spreads_clean[, seq(2, ncol(spreads_clean), 2)] - spreads_clean[, seq(1, ncol(spreads_clean), 2)]
 colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))
 bid_ask$Date <- spreads$Date...1
-rm(spreads, spreads_clean)
 
 #fill in missing values with previous value
 spot_rates_merged <- na.locf(spot_rates_merged)
@@ -98,21 +97,20 @@ monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11)]
 daily_independent_vars_merged <- datacleanup(daily_independent_vars)
 weekly_independent_vars_merged <- datacleanup(weekly_independent_vars)
 monthly_independent_vars_merged <- datacleanup(monthly_independent_vars)
+monthly_independent_vars_merged <- monthly_independent_vars_merged[order(monthly_independent_vars_merged$dates),]
 
 #monthly_independent_vars <- datacleanup(monthly_independent_vars)
-rm(list=setdiff(ls(),c('daily_independent_vars_merged', 'independent_vars','spot_rates_merged_returns','spreads',
-                       'stable_coins', "datacleanup", "weekly_independent_vars_merged", "monthly_independent_vars_merged")))
+rm(list=setdiff(ls(),c('daily_independent_vars_merged', 'independent_vars','spot_rates_merged_returns', "spot_rates_merged",
+                       'stable_coins', "datacleanup", "weekly_independent_vars_merged", "monthly_independent_vars_merged", "bid_ask")))
 
 # Convert to numeric
 daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)] <- sapply(daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)], as.numeric)
-
-#Should fill in NAs where no NA is preceding, i.e., not for time period where some variable has not started yet
-daily_independent_vars_merged <- na.locf(daily_independent_vars_merged, na.rm = F)
+daily_independent_vars_merged <- select(daily_independent_vars_merged, -25)
 
 #removes rows where NAs across all columns (no date etc.) 
+daily_independent_vars_merged <- daily_independent_vars_merged[rowSums(is.na(daily_independent_vars_merged)) != ncol(daily_independent_vars_merged),]
 weekly_independent_vars_merged = weekly_independent_vars_merged[apply(weekly_independent_vars_merged,1,function(x)any(!is.na(x))),]
-monthly_independent_vars_merged = monthly_independent_vars_merged[apply(monthly_independent_vars_merged,1,function(x)any(!is.na(x))),]
-
+monthly_independent_vars_merged <- monthly_independent_vars_merged[rowSums(is.na(monthly_independent_vars_merged)) != ncol(monthly_independent_vars_merged),]
 
 
 # Data Visualization ------------------------------------------------------
