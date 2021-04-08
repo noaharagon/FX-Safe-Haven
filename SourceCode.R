@@ -80,12 +80,14 @@ spreads = spreads[,1:29]
 spreads_clean <- select(spreads, -5)
 spreads_clean <- datacleanup(spreads_clean)
 date_purposes <- spreads_clean[1:5539,1]
+date_purposes <- as.Date(date_purposes$dates, format = "%Y-%m-%d")
 spreads_clean <- spreads_clean %>% select(-contains("Date"))
 spreads_clean <- spreads_clean %>% relocate("Ask Price CHF/INR", .after = "Bid Price CHF/INR")
 bid_ask <- spreads_clean[, seq(2, ncol(spreads_clean), 2)] - spreads_clean[, seq(1, ncol(spreads_clean), 2)]
 colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))
 bid_ask <- bid_ask[rowSums(is.na(bid_ask)) != ncol(bid_ask),]
 bid_ask$Date <- date_purposes
+bid_ask <- bid_ask %>% relocate("Date", .before = colnames(bid_ask)[1])
 
 bid_ask = bid_ask[5485:6,]
 bid_ask = na.locf(bid_ask)
@@ -102,7 +104,7 @@ weekly_independent_vars <- independent_vars[,c(37:38,69:70)]
 monthly_independent_vars <- independent_vars[,c(49:56,65:68)]
 
 #Replace Year Column of Geopolitical Risk with Date Column & Drop Months as Redundant
-monthly_independent_vars[!is.na(monthly_independent_vars[,9]), 9] <- rev(seq(as.Date("1997-01-01"), as.Date("2021-01-01"), by = "months"))
+monthly_independent_vars[!is.na(monthly_independent_vars[,9]), 9] <- rev(seq(as.Date("1997-01-01"), as.Date("2021-01-01"),by="months")-1)
 monthly_independent_vars$Year...65 = sort(as.Date(monthly_independent_vars$Year...65), na.last = T)
 monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11)]
 
