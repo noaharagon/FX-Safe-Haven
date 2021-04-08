@@ -87,7 +87,8 @@ colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))
 bid_ask <- bid_ask[rowSums(is.na(bid_ask)) != ncol(bid_ask),]
 bid_ask$Date <- date_purposes
 
-bid_ask = bid_ask[1:which(grepl(2000-03-17, bid_ask$Date)),]
+bid_ask = bid_ask[5485:6,]
+bid_ask = na.locf(bid_ask)
 
 #compute log returns of spot rates
 difflog <- function(x){
