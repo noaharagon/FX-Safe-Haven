@@ -12,6 +12,8 @@ library("ggplot2")
 library("ggthemes")
 library("zoo")
 library("tibble")
+library("mixtools")
+library("stargazer")
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice", 
@@ -68,6 +70,8 @@ rm(i)
 spot_rates_merged[,2:ncol(spot_rates_merged)] = sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], as.numeric)
 
 #Calculating Bid-Ask Spreads
+spreads_clean <- select(spreads, -5)
+spreads_clean <- datacleanup(spreads_clean)
 spreads_clean <- spreads %>% select(-contains("Date"))
 spreads_clean <- spreads_clean %>% relocate("Ask Price CHF/INR", .after = "Bid Price CHF/INR")
 bid_ask <- spreads_clean[, seq(2, ncol(spreads_clean), 2)] - spreads_clean[, seq(1, ncol(spreads_clean), 2)]
@@ -142,6 +146,17 @@ for (i in colnames(spot_rates_merged[2:19])) {
   ggsave(g, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
 }
 rm(c(i,z))
+
+
+# Data Exploration --------------------------------------------------------
+
+#summary statistics
+summary_stats <- summary(spot_rates_merged)
+
+#histogram
+
+#qq-plots
+
 
 # Finite Gaussian Mixture  ------------------------------------------------
 
