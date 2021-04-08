@@ -69,17 +69,19 @@ for (i in c("JAPANESE YEN TO US $ (WMR) - EXCHANGE RATE",'NORWEGIAN KRONE TO US 
 rm(i)
 spot_rates_merged[,2:ncol(spot_rates_merged)] = sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], as.numeric)
 
+#fill in missing values with previous value
+spot_rates_merged <- na.locf(spot_rates_merged)
+
 #Calculating Bid-Ask Spreads
 spreads_clean <- select(spreads, -5)
 spreads_clean <- datacleanup(spreads_clean)
-spreads_clean <- spreads %>% select(-contains("Date"))
+date_purposes <- spreads_clean[1:5539,1]
+spreads_clean <- spreads_clean %>% select(-contains("Date"))
 spreads_clean <- spreads_clean %>% relocate("Ask Price CHF/INR", .after = "Bid Price CHF/INR")
 bid_ask <- spreads_clean[, seq(2, ncol(spreads_clean), 2)] - spreads_clean[, seq(1, ncol(spreads_clean), 2)]
 colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))
-bid_ask$Date <- spreads$Date...1
-
-#fill in missing values with previous value
-spot_rates_merged <- na.locf(spot_rates_merged)
+bid_ask <- bid_ask[rowSums(is.na(bid_ask)) != ncol(bid_ask),]
+bid_ask$Date <- date_purposes
 
 #compute log returns of spot rates
 difflog <- function(x){
