@@ -41,6 +41,8 @@ spot_rates[,seq(1, ncol(spot_rates), 2)] <- lapply(spot_rates[,seq(1, ncol(spot_
 spot_rates[,23:ncol(spot_rates)] <- spot_rates[nrow(spot_rates):1, 23:ncol(spot_rates)]
 independent_vars[,c(35:64,69:70)] <- independent_vars[nrow(independent_vars):1,c(35:64,69:70)]
 
+spot_rates = spot_rates[,1:22]
+
 # Function to clean data
 datacleanup <- function(data){
   vars <- colnames(data[, seq(2, ncol(data), 2)])
@@ -70,7 +72,9 @@ rm(i)
 spot_rates_merged[,2:ncol(spot_rates_merged)] = sapply(spot_rates_merged[,2:ncol(spot_rates_merged)], as.numeric)
 
 #fill in missing values with previous value
-spot_rates_merged <- na.locf(spot_rates_merged)
+#spot_rates_merged <- na.locf(spot_rates_merged)
+
+spreads = spreads[,1:29]
 
 #Calculating Bid-Ask Spreads
 spreads_clean <- select(spreads, -5)
@@ -82,6 +86,8 @@ bid_ask <- spreads_clean[, seq(2, ncol(spreads_clean), 2)] - spreads_clean[, seq
 colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))
 bid_ask <- bid_ask[rowSums(is.na(bid_ask)) != ncol(bid_ask),]
 bid_ask$Date <- date_purposes
+
+bid_ask = bid_ask[1:which(grepl(2000-03-17, bid_ask$Date)),]
 
 #compute log returns of spot rates
 difflog <- function(x){
