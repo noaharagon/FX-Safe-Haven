@@ -137,7 +137,12 @@ daily_independent_vars_merged <- daily_independent_vars_merged[rowSums(is.na(dai
 weekly_independent_vars = weekly_independent_vars[apply(weekly_independent_vars,1,function(x)any(!is.na(x))),]
 monthly_independent_vars_merged <- monthly_independent_vars_merged[rowSums(is.na(monthly_independent_vars_merged)) != ncol(monthly_independent_vars_merged),]
 
-#na.locf
+#Check maximum NAs in sequence, -INF means no more than 1 NA in a row 
+for (i in colnames(daily_independent_vars_merged)){
+  x = rle(is.na(daily_independent_vars_merged[,i]))
+  print(max(x$lengths[x$values][x$lengths[x$values] != max(x$lengths[x$values])]))}
+
+daily_independent_vars_merged = na.locf(daily_independent_vars_merged, na.rm = F)
 
 
 # Data Visualization ------------------------------------------------------
