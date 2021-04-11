@@ -111,6 +111,7 @@ monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11)]
 
 #Merge all daily independent variables into one DataFrame with uniform dates
 daily_independent_vars_merged <- datacleanup(daily_independent_vars)
+daily_independent_vars_merged <- daily_independent_vars_merged[order(daily_independent_vars_merged$dates),]
 weekly_independent_vars_merged <- datacleanup(weekly_independent_vars)
 monthly_independent_vars_merged <- datacleanup(monthly_independent_vars)
 monthly_independent_vars_merged <- monthly_independent_vars_merged[order(monthly_independent_vars_merged$dates),]
