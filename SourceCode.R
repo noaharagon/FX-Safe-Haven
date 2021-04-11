@@ -105,6 +105,7 @@ monthly_independent_vars <- independent_vars[,c(49:56,65:68)]
 
 #Replace Year Column of Geopolitical Risk with Date Column & Drop Months as Redundant
 monthly_independent_vars[!is.na(monthly_independent_vars[,9]), 9] <- rev(seq(as.Date("1997-01-01"), as.Date("2021-01-01"),by="months")-1)
+monthly_independent_vars[!is.na(monthly_independent_vars[,7]), 7] <-(seq(as.Date("2003-05-01"), as.Date("2021-04-01"),by="months")-1)
 monthly_independent_vars$Year...65 = sort(as.Date(monthly_independent_vars$Year...65), na.last = T)
 monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11)]
 
