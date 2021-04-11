@@ -100,34 +100,44 @@ spot_rates_merged_returns$dates <- spot_rates_merged[2:nrow(spot_rates_merged), 
 
 #split independent variables by time frequency
 daily_independent_vars <- independent_vars[,c(1:32,35:36,39:48,57:64)]
-weekly_independent_vars <- independent_vars[,c(37:38,69:70)]
-monthly_independent_vars <- independent_vars[,c(49:56,65:68)]
+weekly_independent_vars <- independent_vars[,c(37:38)]
+monthly_independent_vars <- independent_vars[,c(49:56,65:70)]
 
-#Replace Year Column of Geopolitical Risk with Date Column & Drop Months as Redundant
+#Replace Year Column of Geopolitical Risk with Date Column & Drop Months as Redundant & SNB Date Column
 monthly_independent_vars[!is.na(monthly_independent_vars[,9]), 9] <- rev(seq(as.Date("1997-01-01"), as.Date("2021-01-01"),by="months")-1)
 monthly_independent_vars[!is.na(monthly_independent_vars[,7]), 7] <-(seq(as.Date("2003-05-01"), as.Date("2021-04-01"),by="months")-1)
+monthly_independent_vars[!is.na(monthly_independent_vars[,13]), 13] <-(seq(as.Date("2000-02-01"), as.Date("2021-03-01"),by="months")-1)
 monthly_independent_vars$Year...65 = sort(as.Date(monthly_independent_vars$Year...65), na.last = T)
-monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11)]
+monthly_independent_vars <- monthly_independent_vars[, c(1:9, 11, 13:14)]
 
 #Merge all daily independent variables into one DataFrame with uniform dates
 daily_independent_vars_merged <- datacleanup(daily_independent_vars)
 daily_independent_vars_merged <- daily_independent_vars_merged[order(daily_independent_vars_merged$dates),]
-weekly_independent_vars_merged <- datacleanup(weekly_independent_vars)
+colnames(weekly_independent_vars)[1] <- "dates"
 monthly_independent_vars_merged <- datacleanup(monthly_independent_vars)
 monthly_independent_vars_merged <- monthly_independent_vars_merged[order(monthly_independent_vars_merged$dates),]
 
+#Remove Fund Flows
+monthly_independent_vars_merged <- select(monthly_independent_vars_merged, -5) 
+
 #monthly_independent_vars <- datacleanup(monthly_independent_vars)
 rm(list=setdiff(ls(),c('daily_independent_vars_merged', 'independent_vars','spot_rates_merged_returns', "spot_rates_merged",
-                       'stable_coins', "datacleanup", "weekly_independent_vars_merged", "monthly_independent_vars_merged", "bid_ask")))
+                       'stable_coins', "datacleanup", "weekly_independent_vars", "monthly_independent_vars_merged", "bid_ask")))
 
-# Convert to numeric
+# Convert to numeric and Remove CDX & Last Price
 daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)] <- sapply(daily_independent_vars_merged[,2:ncol(daily_independent_vars_merged)], as.numeric)
 daily_independent_vars_merged <- select(daily_independent_vars_merged, -25)
+daily_independent_vars_merged <- select(daily_independent_vars_merged, -24)
+
+#Trim Barclay's US Corp High Yield pre 2000-03-17
+daily_independent_vars_merged <- daily_independent_vars_merged[3384:nrow(daily_independent_vars_merged), ]
 
 #removes rows where NAs across all columns (no date etc.) 
 daily_independent_vars_merged <- daily_independent_vars_merged[rowSums(is.na(daily_independent_vars_merged)) != ncol(daily_independent_vars_merged),]
-weekly_independent_vars_merged = weekly_independent_vars_merged[apply(weekly_independent_vars_merged,1,function(x)any(!is.na(x))),]
+weekly_independent_vars = weekly_independent_vars[apply(weekly_independent_vars,1,function(x)any(!is.na(x))),]
 monthly_independent_vars_merged <- monthly_independent_vars_merged[rowSums(is.na(monthly_independent_vars_merged)) != ncol(monthly_independent_vars_merged),]
+
+#na.locf
 
 
 # Data Visualization ------------------------------------------------------
