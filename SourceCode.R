@@ -187,4 +187,5 @@ summary_stats <- summary(spot_rates_merged)
 
 
 # Finite Gaussian Mixture  ------------------------------------------------
+CHF_reg <- regmixEM(y = spot_rates_merged_returns$`INDIAN RUPEE TO CHF (WMR) - EXCHANGE RATE`, x = head(daily_independent_vars_merged$`CBOE SPX VOLATILITY VIX (NEW) - PRICE INDEX`, 5479), k = 2)
 
