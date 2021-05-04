@@ -141,6 +141,7 @@ monthly_independent_vars_merged <- monthly_independent_vars_merged[rowSums(is.na
 for (i in colnames(daily_independent_vars_merged)){
   x = rle(is.na(daily_independent_vars_merged[,i]))
   print(max(x$lengths[x$values][x$lengths[x$values] != max(x$lengths[x$values])]))}
+rm(x,i)
 
 daily_independent_vars_merged = na.locf(daily_independent_vars_merged, na.rm = F)
 
@@ -186,6 +187,20 @@ summary_stats <- summary(spot_rates_merged)
 #qq-plots
 
 
+
 # Finite Gaussian Mixture  ------------------------------------------------
-CHF_reg <- regmixEM(y = spot_rates_merged_returns$`INDIAN RUPEE TO CHF (WMR) - EXCHANGE RATE`, x = head(daily_independent_vars_merged$`CBOE SPX VOLATILITY VIX (NEW) - PRICE INDEX`, 5479), k = 2)
+
+diffsimple <- function(x){
+  diff(x)/(x[-length(x)])}
+
+difflog <- function(x){
+  diff(log(x))}
+
+daily_independent_vars_merged_returns = as.data.frame(sapply(daily_independent_vars_merged[,c(2:4,10,11,13)], difflog))
+daily_independent_vars_merged_returns$dates <- daily_independent_vars_merged[2:nrow(daily_independent_vars_merged), "dates"]
+
+CHF_reg <- regmixEM(y = spot_rates_merged_returns['SWISS FRANC TO US $ (WMR) - EXCHANGE RATE'], 
+                    x = as.matrix(daily_independent_vars_merged_returns[1:5479,c(1:6)],k=3))
+                                                                                                           
+                                                                                                         
 
