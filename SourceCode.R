@@ -182,10 +182,16 @@ rm(c(i,z))
 #summary statistics
 summary_stats <- summary(spot_rates_merged)
 
-#histogram
+#histogram of FX returns
+for (i in colnames(spot_rates_merged_returns[,1:ncol(spot_rates_merged_returns)-1])) {
+  hist(spot_rates_merged_returns[,i], breaks = 200, main = i)
+}
 
-#qq-plots
-
+#qq-plots to justify selection of distribution
+for (i in colnames(spot_rates_merged_returns[,1:ncol(spot_rates_merged_returns)-1])) {
+  qqnorm(spot_rates_merged_returns[,i], pch = 1, frame = FALSE, main = i)
+  qqline(spot_rates_merged_returns[,i], col = "steelblue", lwd = 2)
+}
 
 
 # Finite Gaussian Mixture  ------------------------------------------------
