@@ -202,11 +202,26 @@ diffsimple <- function(x){
 difflog <- function(x){
   diff(log(x))}
 
-daily_independent_vars_merged_returns = as.data.frame(sapply(daily_independent_vars_merged[,c(2:4,10,11,13)], difflog))
+
+daily_independent_vars_merged_returns = as.data.frame(sapply(daily_independent_vars_merged[,c(2:4,9,10,11,13)], diffsimple))
 daily_independent_vars_merged_returns$dates <- daily_independent_vars_merged[2:nrow(daily_independent_vars_merged), "dates"]
 
-CHF_reg <- regmixEM(y = spot_rates_merged_returns['SWISS FRANC TO US $ (WMR) - EXCHANGE RATE'], 
-                    x = as.matrix(daily_independent_vars_merged_returns[1:5479,c(1:6)],k=3))
-                                                                                                           
-                                                                                                         
+
+CHF_reg <- regmixEM(y = spot_rates_merged_returns[1:5479, 1], x = as.matrix(cbind(daily_independent_vars_merged_returns[1:5479, c(2, 3, 5, 6, 7)], bid_ask[1:5479,2])), k = 2)
+
+#for CHF/EURO take German yields instead of treasury?
+EUR_reg <- regmixEM(y = spot_rates_merged_returns[1:5479, 3], x = as.matrix(cbind(daily_independent_vars_merged_returns[1:5479, c(2, 3, 4, 5, 6, 7)], bid_ask[1:5479,3])), k = 2)
+
+
+#plotting classification into "business as usual" and crisis
+EUR_mix <- normalmixEM(spot_rates_merged_returns[1:5479, 3], k = 2)    
+EUR_mix_df <- spot_rates_merged_returns[,c(3,12)]
+#if posterior of component 1 < 0.5 then component 2
+EUR_mix_df$component <- ifelse(EUR_mix$posterior[,1]<0.5, "2", "1")   
+ggplot(EUR_mix_df, aes(x = dates, y = EUR_mix_df[,1])) + 
+  geom_point(aes(colour = factor(component))) + theme_economist_white() + ggtitle("CHF/EUR: Business as Usual vs. Crisis") +
+  ylab("Spot Returns") + xlab("Date") 
+rm(EUR_mix_df)
+
+
 
