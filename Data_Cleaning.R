@@ -72,19 +72,19 @@ spot_rates[,2:ncol(spot_rates)] = sapply(spot_rates[,2:ncol(spot_rates)], as.num
 spreads = spreads[,1:29]
 
 #Calculating Bid-Ask Spreads
-spreads <- select(spreads, -5)
+spreads <- select(spreads, -5) #remove extra date column
 spreads <- datacleanup(spreads)
 date_purposes <- spreads[1:5539,1]
 date_purposes <- as.Date(date_purposes$dates, format = "%Y-%m-%d")
 spreads <- spreads %>% select(-contains("Date"))
-spreads <- spreads %>% relocate("Ask Price CHF/INR", .after = "Bid Price CHF/INR")
+spreads <- spreads %>% relocate("Ask Price CHF/INR", .after = "Bid Price CHF/INR") #reorder to calculate spreads
 bid_ask <- spreads[, seq(2, ncol(spreads), 2)] - spreads[, seq(1, ncol(spreads), 2)]
-colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))
-bid_ask <- bid_ask[rowSums(is.na(bid_ask)) != ncol(bid_ask),]
-bid_ask$Date <- date_purposes
-bid_ask <- bid_ask %>% relocate("Date", .before = colnames(bid_ask)[1])
+colnames(bid_ask)<-gsub("Ask Price","", colnames(bid_ask))#give nicer column names
+bid_ask <- bid_ask[rowSums(is.na(bid_ask)) != ncol(bid_ask),] #deal with NA's
+bid_ask$Date <- date_purposes #add date column back to df
+bid_ask <- bid_ask %>% relocate("Date", .before = colnames(bid_ask)[1]) #put date column first
 
-bid_ask = bid_ask[5485:6,]
+bid_ask = bid_ask[5485:6,] #reverse order to make it chronological as other variables
 bid_ask = na.locf(bid_ask)
 
 #compute log returns of spot rates
