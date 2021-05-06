@@ -14,6 +14,7 @@ library("zoo")
 library("tibble")
 library("mixtools")
 library("stargazer")
+library("alphastable")
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice/Clean Data", 
@@ -24,6 +25,7 @@ setwd(Paths[Sys.info()[7]])
 #Data 
 bid_ask = read.csv('Bid_Ask_Clean.csv')
 spot_rates = read.csv('Spot_Rates_Clean.csv')
+spot_rates$dates <- as.Date(spot_rates$dates)
 spot_rates_returns = read.csv('Spot_Rates_Returns_Clean.csv')
 daily_independent_returns = read.csv('Daily_Independent_Returns_Clean.csv')
 
@@ -61,7 +63,8 @@ for (i in colnames(spot_rates[2:ncol(spot_rates)])) {
   plot_list[[i]] = g
   ggsave(g, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
 }
-rm(c(i,z))
+rm(i)
+rm(z)
 
 
 # Data Exploration --------------------------------------------------------
