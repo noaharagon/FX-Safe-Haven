@@ -109,15 +109,21 @@ CHFUSD_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spo
 CHFEUR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, "CHF.EUR"], 
                             x = as.matrix(cbind(daily_independent_returns[which(grepl("2006-07-19", daily_independent_returns$dates)):5479
                                                                           , c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[which(grepl("2006-07-19", bid_ask$Date)):5480,3])), k = 2)
-
 #reg mixture for CHF/GBP with all daily variables beginning 2006-07-19
 CHFGBP_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, "CHF.GBP"], 
                             x = as.matrix(cbind(daily_independent_returns[which(grepl("2006-07-19", daily_independent_returns$dates)):5479
                                                                           , c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[which(grepl("2006-07-19", bid_ask$Date)):5480,4])), k = 2)
-
+x = as.data.frame(summary(CHFEUR_reg_2006), summary(CHFEUR_reg_2006))
 #reg mixture for USD/INR with all daily variables beginning 2006-07-19
 USDINR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, "IDR.USD"], 
                             x = as.matrix(cbind(daily_independent_returns[which(grepl("2006-07-19", daily_independent_returns$dates)):5479, c(2:7,9:11,13,14,16,17,20,23,25)])), k = 2)
+
+
+#LaTeX Table Preparation
+CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2006$lambda,CHFEUR_reg_2006$sigma, CHFEUR_reg_2006$beta)
+rownames(CHFEUR_LaTeX_Table) = c('LIGMA', 'SIGMA', 'Intercept',colnames(daily_independent_returns[c(2:7,9:11,13,14,16,17,20,23,25)]),'Bid-Ask')
+stargazer(CHFEUR_LaTeX_Table)
+
 
 #plotting classification into "business as usual" and crisis
 significant_dates <- read.table(textConnection(
