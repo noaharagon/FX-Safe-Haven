@@ -40,13 +40,14 @@ setwd(Paths[Sys.info()[7]])
 
 # US Recession Start and End as per FRED St. Louis
 recessions.df = read.table(textConnection(
-  "Peak, Trough
-1973-11-01, 1975-03-01
-1980-01-01, 1980-07-01
-1981-07-01, 1982-11-01
-1990-07-01, 1991-03-01
-2001-03-01, 2001-11-01
-2007-12-01, 2009-06-01"), sep=',', colClasses=c('Date', 'Date'), header=TRUE)
+  "Peak, Trough, Type
+1973-11-01, 1975-03-01, Recession
+1980-01-01, 1980-07-01, Recession
+1981-07-01, 1982-11-01, Recession
+1990-07-01, 1991-03-01, Recession
+2001-03-01, 2001-11-01, Recession
+2007-12-01, 2009-06-01, Recession
+2009-10-01, 2013-05-01, Euro-Crisis"), sep=',', colClasses=c('Date', 'Date', 'character'), header=TRUE)
 recessions.trim = subset(recessions.df, Peak >= "2000-03-17")
 rm(recessions.df)
 
@@ -56,11 +57,9 @@ for (i in colnames(spot_rates[2:ncol(spot_rates)])) {
   z = zoo(spot_rates[, i], order.by = spot_rates$dates)
   g = ggplot(fortify(z,melt=T)) +
     geom_line(aes(x=Index,y=Value))+ 
-    geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf), fill='red', alpha=0.2)+
-    ylab("Spot Rate") +
-    xlab("Date") +
-    theme_economist_white() +
-    ggtitle(paste("Spot Rate of", i, sep = " "))
+    geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, color = recessions.trim$Type, fill=recessions.trim$Type), alpha=0.2)+
+    labs(y = "Spot Rate", x= "", color = "Times of Distress", fill = "Times of Distress")
+    theme_economist_white(gray_bg = F)
   plot_list[[i]] = g
   ggsave(g, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
 }
