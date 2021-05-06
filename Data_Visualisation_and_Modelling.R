@@ -100,6 +100,16 @@ CHFGBP_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.GBP"], x = as.ma
 USDINR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "IDR.USD"], x = as.matrix(daily_independent_returns[1:5479, c(2, 3, 4, 5, 6, 7)]), k = 2)
 
 #plotting classification into "business as usual" and crisis
+significant_dates <- read.table(textConnection(
+  "Date, Event
+2001-09-11, Terrorist
+2004-03-11, Terrorist
+2005-07-07, Terrorist
+2010-05-06, FlashCrash
+2013-04-23, FlashCrash
+2015-11-13, Terrorist
+2017-05-22, Terrorist"), sep=',', colClasses = c("Date", "character"), header=TRUE)
+
 mixture_plots <- list("CHF.USD", "CHF.GBP", "CHF.EUR")
 mix_plots_list = list()
 for (i in mixture_plots) {
@@ -109,7 +119,7 @@ for (i in mixture_plots) {
   str1 <- paste0(toAssign, "<-", "ifelse(eval(parse(text = paste0(i, '_mix', '$posterior[, 1]')))<0.5, '2', '1')")
   eval(parse(text=str1))
   mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
-    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]"))))) +theme_economist_white()+
+    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))))+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white()+
     ggtitle("Business as Usual vs. Crisis") + ylab("Spot Returns") + xlab("Date")
   mix_plots_list[[i]] = mix_plot
   ggsave(mix_plot, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
