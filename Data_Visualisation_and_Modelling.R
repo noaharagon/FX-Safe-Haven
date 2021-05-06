@@ -87,20 +87,30 @@ for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
 
 # Finite Gaussian Mixture  ------------------------------------------------
 
-CHF_reg <- regmixEM(y = spot_rates_returns[1:5479, 2], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2, 3, 5, 6, 7)], bid_ask[1:5479,2])), k = 2)
+#reg mixture for CHF/USD with all daily variables beginning 2000
+CHFUSD_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2, 3, 4, 5, 6, 7)], bid_ask[1:5479,2])), k = 2)
 
-#for CHF/EURO take German yields instead of treasury?
-EUR_reg <- regmixEM(y = spot_rates_returns[1:5479, 3], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2, 3, 4, 5, 6, 7)], bid_ask[1:5479,3])), k = 2)
+#reg mixture for CHF/EUR with all daily variables beginning 2000
+CHFEUR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.EUR"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2, 3, 4, 5, 6, 7)], bid_ask[1:5479,3])), k = 2)
 
+#reg mixture for CHF/GBP with all daily variables beginning 2000
+CHFGBP_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.GBP"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2, 3, 4, 5, 6, 7)], bid_ask[1:5479,4])), k = 2)
+
+#reg mixture for USD/INR
+USDINR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "IDR.USD"], x = as.matrix(daily_independent_returns[1:5479, c(2, 3, 4, 5, 6, 7)]), k = 2)
 
 #plotting classification into "business as usual" and crisis
-EUR_mix <- normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)    
-EUR_mix_df <- spot_rates_returns[,c("CHF.EUR", "dates")]
-#if posterior of component 1 < 0.5 then component 2
-EUR_mix_df$component <- ifelse(EUR_mix$posterior[,1]<0.5, "2", "1")   
-ggplot(EUR_mix_df, aes(x = dates, y = EUR_mix_df[,1])) +
-  geom_point(aes(colour = factor(component))) + theme_economist_white() 
-+ ggtitle("CHF/EUR: Business as Usual vs. Crisis") + ylab("Spot Returns") + xlab("Date") 
-
-
-
+mixture_plots <- list("CHF.USD", "CHF.GBP", "CHF.EUR")
+mix_plots_list = list()
+for (i in mixture_plots) {
+  assign(paste0(i, "_mix"), normalmixEM(spot_rates_returns[1:5479, i], k = 2))
+  assign(paste0(i, "_mix_df"), spot_rates_returns[,c(i, "dates")])
+  toAssign <- paste0(i, "_mix_df", "[,'component']")
+  str1 <- paste0(toAssign, "<-", "ifelse(eval(parse(text = paste0(i, '_mix', '$posterior[, 1]')))<0.5, '2', '1')")
+  eval(parse(text=str1))
+  mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
+    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]"))))) +theme_economist_white()+
+    ggtitle("Business as Usual vs. Crisis") + ylab("Spot Returns") + xlab("Date")
+  mix_plots_list[[i]] = mix_plot
+  ggsave(mix_plot, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
+}
