@@ -27,6 +27,7 @@ bid_ask = read.csv('Bid_Ask_Clean.csv')
 spot_rates = read.csv('Spot_Rates_Clean.csv')
 spot_rates$dates <- as.Date(spot_rates$dates)
 spot_rates_returns = read.csv('Spot_Rates_Returns_Clean.csv')
+spot_rates_returns$dates <- as.Date(spot_rates_returns$dates)
 daily_independent_returns = read.csv('Daily_Independent_Returns_Clean.csv')
 
 # Data Visualization ------------------------------------------------------
@@ -93,14 +94,13 @@ EUR_reg <- regmixEM(y = spot_rates_returns[1:5479, 3], x = as.matrix(cbind(daily
 
 
 #plotting classification into "business as usual" and crisis
-EUR_mix <- normalmixEM(spot_rates_returns[1:5479, 3], k = 2)    
-EUR_mix_df <- spot_rates_returns[,c(3,12)]
+EUR_mix <- normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)    
+EUR_mix_df <- spot_rates_returns[,c("CHF.EUR", "dates")]
 #if posterior of component 1 < 0.5 then component 2
 EUR_mix_df$component <- ifelse(EUR_mix$posterior[,1]<0.5, "2", "1")   
-ggplot(EUR_mix_df, aes(x = dates, y = EUR_mix_df[,1])) + 
-  geom_point(aes(colour = factor(component))) + theme_economist_white() + ggtitle("CHF/EUR: Business as Usual vs. Crisis") +
-  ylab("Spot Returns") + xlab("Date") 
-rm(EUR_mix_df)
+ggplot(EUR_mix_df, aes(x = dates, y = EUR_mix_df[,1])) +
+  geom_point(aes(colour = factor(component))) + theme_economist_white() 
++ ggtitle("CHF/EUR: Business as Usual vs. Crisis") + ylab("Spot Returns") + xlab("Date") 
 
 
 
