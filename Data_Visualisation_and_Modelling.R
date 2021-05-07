@@ -148,7 +148,7 @@ for (i in mixture_plots) {
   eval(parse(text=str1))
   mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
     geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white(gray_bg = F)+
-    ggtitle("") + labs(y = "Spot Rate Return", x= "", color = "Event Type") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
+    ggtitle(" ") + labs(y = "Spot Rate Return", x= "", color = "Event Type") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
   mix_plots_list[[i]] = mix_plot
   ggsave(mix_plot, file=paste0("mixtureplot_", i,".png"), width = 14, height = 10, units = "cm")
 }
