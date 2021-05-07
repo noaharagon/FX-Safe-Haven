@@ -58,7 +58,7 @@ for (i in colnames(spot_rates[2:ncol(spot_rates)])) {
   g = ggplot(fortify(z,melt=T)) +
     geom_line(aes(x=Index,y=Value))+ 
     geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, color = recessions.trim$Type, fill=recessions.trim$Type), alpha=0.2)+
-    labs(y = "Spot Rate", x= "", color = "Times of Distress", fill = "Times of Distress") + theme(legend.position = "bottom") +
+    labs(y = "Spot Rate", x= "", color = "", fill = "") + theme(legend.position = "bottom") +
     theme_economist_white(gray_bg = F)
   plot_list[[i]] = g
   ggsave(g, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
@@ -145,7 +145,7 @@ for (i in mixture_plots) {
   str1 <- paste0(toAssign, "<-", "ifelse(eval(parse(text = paste0(i, '_mix', '$posterior[, 1]')))<0.5, '2', '1')")
   eval(parse(text=str1))
   mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
-    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))))+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white(gray_bg = F)+
+    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white(gray_bg = F)+
     ggtitle("Business as Usual vs. Crisis") + labs(y = "Spot Rate Return", x= "", color = "Event Type") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
   mix_plots_list[[i]] = mix_plot
   ggsave(mix_plot, file=paste0("mixtureplot_", i,".png"), width = 14, height = 10, units = "cm")
