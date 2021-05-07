@@ -24,6 +24,8 @@ setwd(Paths[Sys.info()[7]])
 
 #Data 
 bid_ask = read.csv('Bid_Ask_Clean.csv')
+bid_ask = bid_ask[nrow(bid_ask):1,]
+row.names(bid_ask) <- NULL
 spot_rates = read.csv('Spot_Rates_Clean.csv')
 spot_rates$dates <- as.Date(spot_rates$dates)
 spot_rates_returns = read.csv('Spot_Rates_Returns_Clean.csv')
@@ -87,16 +89,16 @@ for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
 # Finite Gaussian Mixture  ------------------------------------------------
 
 #reg mixture for CHF/USD with all daily variables beginning 2000
-CHFUSD_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), k = 2)
+CHFUSD_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), k = 2)
 
 #reg mixture for CHF/EUR with all daily variables beginning 2000
-CHFEUR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.EUR"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)], bid_ask[2:5480,3])), k = 2)
-
+CHFEUR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.EUR"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[2:5480,3])), k = 2)
+CHF_EUR_reg_2000_SE <- boot.se(CHFEUR_reg_2000)
 #reg mixture for CHF/GBP with all daily variables beginning 2000
-CHFGBP_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.GBP"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)], bid_ask[2:5480,4])), k = 2)
+CHFGBP_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.GBP"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[2:5480,4])), k = 2)
 
 #reg mixture for USD/INR
-USDINR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "IDR.USD"], x = as.matrix(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)]), k = 2)
+USDINR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "IDR.USD"], x = as.matrix(daily_independent_returns[1:5479, c(2:7,9:11,13,14,16,17,20,23,25)]), k = 2)
 
 
 #reg mixture for CHF/USD with all daily variables beginning 2006-07-19
@@ -120,8 +122,8 @@ USDINR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spo
 
 
 #LaTeX Table Preparation
-CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2006$lambda,CHFEUR_reg_2006$sigma, CHFEUR_reg_2006$beta)
-rownames(CHFEUR_LaTeX_Table) = c('LIGMA', 'SIGMA', 'Intercept',colnames(daily_independent_returns[c(2:7,9:11,13,14,16,17,20,23,25)]),'Bid-Ask')
+CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
+rownames(CHFEUR_LaTeX_Table) = c('Lambda', 'Sigma', 'Intercept',colnames(daily_independent_returns[c(2:7,9:11,13,14,16,17,20,23,25)]),'Bid-Ask')
 stargazer(CHFEUR_LaTeX_Table)
 
 
@@ -146,7 +148,7 @@ for (i in mixture_plots) {
   eval(parse(text=str1))
   mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
     geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white(gray_bg = F)+
-    ggtitle("Business as Usual vs. Crisis") + labs(y = "Spot Rate Return", x= "", color = "Event Type") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
+    ggtitle("") + labs(y = "Spot Rate Return", x= "", color = "Event Type") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
   mix_plots_list[[i]] = mix_plot
   ggsave(mix_plot, file=paste0("mixtureplot_", i,".png"), width = 14, height = 10, units = "cm")
 }
