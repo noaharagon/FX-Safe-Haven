@@ -89,15 +89,7 @@ for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
 # Finite Gaussian Mixture  ------------------------------------------------
 
 #reg mixture for CHF/USD with all daily variables beginning 2000
-<<<<<<< HEAD
 CHFUSD_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:10,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), k = 2)
-
-boot.comp(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:10,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), mix.type = 'regmix', B = 10)
-
-
-=======
-CHFUSD_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), k = 2)
->>>>>>> 2913d68bab97b856181bca9147637396ef800ccc
 
 #reg mixture for CHF/EUR with all daily variables beginning 2000
 CHFEUR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.EUR"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[2:5480,3])), k = 2)
@@ -157,13 +149,5 @@ for (i in mixture_plots) {
     geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white(gray_bg = F)+
     ggtitle(" ") + labs(y = "Spot Rate Return", x= "", color = "Event Type") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
   mix_plots_list[[i]] = mix_plot
-<<<<<<< HEAD
   ggsave(mix_plot, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
 }
-
-
-boot.comp(y = spot_rates_returns[1:5479, "IDR.USD"], x = as.matrix(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)]))
-=======
-  ggsave(mix_plot, file=paste0("mixtureplot_", i,".png"), width = 14, height = 10, units = "cm")
-}
->>>>>>> 2913d68bab97b856181bca9147637396ef800ccc
