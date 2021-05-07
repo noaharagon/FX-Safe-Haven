@@ -123,9 +123,18 @@ CHFEUR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spo
 
 #split data into regimes to run separate regressions
 CHFEUR_normalmix <- normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"])
-CHFEUR_segmented <- spot_rates_returns[1:5479, "CHF.EUR"]
+CHFEUR_segmented <- as.data.frame(spot_rates_returns[1:5479, c("CHF.EUR", "dates")])
 CHFEUR_segmented$component <- ifelse(CHFEUR_normalmix$posterior[,1]<0.5, "1", "2")
+CHFEUR_segmented$matching_col <-as.Date(ifelse(CHFEUR_segmented$component== "1", CHFEUR_segmented$dates, 0))
 
+CHFEUR_reg1 <- CHFEUR_segmented[CHFEUR_segmented$component == "1",]
+CHFEUR_reg2 <- CHFEUR_segmented[CHFEUR_segmented$component == "2",]
+independent_comp1 <- daily_independent_returns[which(CHFEUR_segmented$matching_col == head(daily_independent_returns$dates,5479)),]
+independent_comp2 <- daily_independent_returns[which(CHFEUR_segmented$matching_col != head(daily_independent_returns$dates,5479)),]
+
+#run regressions on each data set
+reg_model <- lm(formula = CHFEUR_reg1$CHF.EUR ~ MSCI + SPY + US_10Y + PUT.CALL + VIX + VSTOXX + JPM_GLOBAL_FX_VOLA, data = independent_comp1)
+reg_model2 <- lm(formula = CHFEUR_reg2$CHF.EUR ~ MSCI + SPY + US_10Y + PUT.CALL + VIX + VSTOXX + JPM_GLOBAL_FX_VOLA, data = independent_comp2)
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
