@@ -87,7 +87,11 @@ for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
 # Finite Gaussian Mixture  ------------------------------------------------
 
 #reg mixture for CHF/USD with all daily variables beginning 2000
-CHFUSD_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), k = 2)
+CHFUSD_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:10,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), k = 2)
+
+boot.comp(y = spot_rates_returns[1:5479, "CHF.USD"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:10,13,14,16,17,20,23,25)], bid_ask[2:5480,2])), mix.type = 'regmix', B = 10)
+
+
 
 #reg mixture for CHF/EUR with all daily variables beginning 2000
 CHFEUR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.EUR"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)], bid_ask[2:5480,3])), k = 2)
@@ -113,7 +117,6 @@ CHFEUR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spo
 CHFGBP_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, "CHF.GBP"], 
                             x = as.matrix(cbind(daily_independent_returns[which(grepl("2006-07-19", daily_independent_returns$dates)):5479
                                                                           , c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[which(grepl("2006-07-19", bid_ask$Date)):5480,4])), k = 2)
-x = as.data.frame(summary(CHFEUR_reg_2006), summary(CHFEUR_reg_2006))
 #reg mixture for USD/INR with all daily variables beginning 2006-07-19
 USDINR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, "IDR.USD"], 
                             x = as.matrix(cbind(daily_independent_returns[which(grepl("2006-07-19", daily_independent_returns$dates)):5479, c(2:7,9:11,13,14,16,17,20,23,25)])), k = 2)
@@ -150,3 +153,6 @@ for (i in mixture_plots) {
   mix_plots_list[[i]] = mix_plot
   ggsave(mix_plot, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
 }
+
+
+boot.comp(y = spot_rates_returns[1:5479, "IDR.USD"], x = as.matrix(daily_independent_returns[1:5479, c(2:11,13,14,16,17,20,23,25)]))
