@@ -133,8 +133,25 @@ independent_comp1 <- daily_independent_returns[which(CHFEUR_segmented$matching_c
 independent_comp2 <- daily_independent_returns[which(CHFEUR_segmented$matching_col != head(daily_independent_returns$dates,5479)),]
 
 #run regressions on each data set
-reg_model <- lm(formula = CHFEUR_reg1$CHF.EUR ~ MSCI + SPY + US_10Y + PUT.CALL + VIX + VSTOXX + JPM_GLOBAL_FX_VOLA, data = independent_comp1)
-reg_model2 <- lm(formula = CHFEUR_reg2$CHF.EUR ~ MSCI + SPY + US_10Y + PUT.CALL + VIX + VSTOXX + JPM_GLOBAL_FX_VOLA, data = independent_comp2)
+reg_model <- lm(formula = CHFEUR_reg1$CHF.EUR ~ . -dates - MSCI - DE_3M-US_2Y - US_3M - DE_3M - DE_2Y - MOVE_1M - MOVE_3M - JPM_EM_FX_VOLA_1M - JPM_G10_FX_VOLA_1M, data = independent_comp1)
+reg_model2 <- lm(formula = CHFEUR_reg2$CHF.EUR ~ . -dates - MSCI - DE_3M-US_2Y - US_3M - DE_3M - DE_2Y - MOVE_1M - MOVE_3M - JPM_EM_FX_VOLA_1M - JPM_G10_FX_VOLA_1M - CITI_ECONOMIC_SURPRISE, data = independent_comp2)
+
+CHFGBP_normalmix <- normalmixEM(spot_rates_returns[1:5479, "CHF.GBP"])
+CHFGBP_segmented <- as.data.frame(spot_rates_returns[1:5479, c("CHF.GBP", "dates")])
+CHFGBP_segmented$component <- ifelse(CHFGBP_normalmix$posterior[,1]<0.5, "1", "2")
+CHFGBP_segmented$matching_col <-as.Date(ifelse(CHFGBP_segmented$component== "1", CHFGBP_segmented$dates, 0))
+
+CHFGBP_reg1 <- CHFGBP_segmented[CHFGBP_segmented$component == "1",]
+CHFGBP_reg2 <- CHFGBP_segmented[CHFGBP_segmented$component == "2",]
+independent_comp1_GBP <- daily_independent_returns[which(CHFGBP_segmented$matching_col == head(daily_independent_returns$dates,5479)),]
+independent_comp2_GBP <- daily_independent_returns[which(CHFGBP_segmented$matching_col != head(daily_independent_returns$dates,5479)),]
+
+#run regressions on each data set
+reg_model_GBP <- lm(formula = CHFGBP_reg1$CHF.GBP ~ . -dates - DE_3M, data = independent_comp1_GBP)
+reg_model2_GBP <- lm(formula = CHFGBP_reg2$CHF.GBP ~ . -dates - DE_3M - CITI_ECONOMIC_SURPRISE, data = independent_comp2_GBP)
+
+summary(lm(formula = spot_rates_returns$CHF.USD ~ . -dates - DE_3M - CITI_ECONOMIC_SURPRISE -MSCI - US_2Y - US_3M - DE_2Y - MOVE_1M - MOVE_3M - JPM_EM_FX_VOLA_1M, data = head(daily_independent_returns, 5479)))
+
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
