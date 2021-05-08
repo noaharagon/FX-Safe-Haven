@@ -26,7 +26,7 @@ setwd(Paths[Sys.info()[7]])
 
 #Data 
 bid_ask = read.csv('Bid_Ask_Clean.csv')
-bid_ask = bid_ask[nrow(bid_ask):1,]
+#bid_ask = bid_ask[nrow(bid_ask):1,]
 row.names(bid_ask) <- NULL
 spot_rates = read.csv('Spot_Rates_Clean.csv')
 spot_rates$dates <- as.Date(spot_rates$dates)
@@ -149,20 +149,24 @@ CHFEUR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spo
                             x = as.matrix(cbind(daily_independent_returns[which(grepl("2006-07-19", daily_independent_returns$dates)):5479
                                                                           , c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[which(grepl("2006-07-19", bid_ask$Date)):5480,3])), k = 2)
 
-#split data into regimes to run separate regressions
-CHFEUR_normalmix <- normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"])
-CHFEUR_segmented <- as.data.frame(spot_rates_returns[1:5479, c("CHF.EUR", "dates")])
-CHFEUR_segmented$component <- ifelse(CHFEUR_normalmix$posterior[,1]<0.5, "1", "2")
-CHFEUR_segmented$matching_col <-as.Date(ifelse(CHFEUR_segmented$component== "1", CHFEUR_segmented$dates, 0))
-
-CHFEUR_reg1 <- CHFEUR_segmented[CHFEUR_segmented$component == "1",]
-CHFEUR_reg2 <- CHFEUR_segmented[CHFEUR_segmented$component == "2",]
-independent_comp1 <- daily_independent_returns[which(CHFEUR_segmented$matching_col == head(daily_independent_returns$dates,5479)),]
-independent_comp2 <- daily_independent_returns[which(CHFEUR_segmented$matching_col != head(daily_independent_returns$dates,5479)),]
-
-#run regressions on each data set
-reg_model <- lm(formula = CHFEUR_reg1$CHF.EUR ~ VIX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp1)
-reg_model2 <- lm(formula = CHFEUR_reg2$CHF.EUR ~ VIX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp2)
+#state dependent regression models
+for (i in c("CHF.EUR", "CHF.USD")){
+  #split data into regimes to run separate regressions
+  normalmix = normalmixEM(spot_rates_returns[1:5479, i])
+  segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
+  segmented$component = ifelse(normalmix$posterior[,1]<0.5, "1", "2")
+  segmented$matching_col = as.Date(ifelse(segmented$component== "1", segmented$dates, 0))
+  
+  reg1 = segmented[segmented$component == "1",]
+  reg2 = segmented[segmented$component == "2",]
+  independent_comp1 = daily_independent_returns[which(segmented$matching_col == head(daily_independent_returns$dates,5479)),]
+  independent_comp2 = daily_independent_returns[which(segmented$matching_col != head(daily_independent_returns$dates,5479)),]
+  
+  #run regressions on each data set
+  assign(paste(i,"reg_model1", sep = ""), lm(formula = reg1[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp1))
+  assign(paste(i, 'reg_model2', sep = ""), lm(formula = reg2[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp2))
+  
+  }
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
