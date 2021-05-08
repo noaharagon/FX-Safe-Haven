@@ -163,14 +163,18 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY")){
   independent_comp2 = daily_independent_returns[which(segmented$matching_col != head(daily_independent_returns$dates,5479)),]
   
   #add bid_ask to independent variables
-  independent_comp1$bid_ask = bid_ask[which(segmented$matching_col == bid_ask$Date), paste0("X.",i)]
-  independent_comp2$bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]
+  independent_comp1$Bid_ask = bid_ask[which(segmented$matching_col == bid_ask$Date), paste0("X.",i)]
+  independent_comp2$Bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]
   
   #run regressions on each data set
-  assign(paste(i,"reg_model1", sep = ""), lm(formula = reg1[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp1))
-  assign(paste(i, 'reg_model2', sep = ""), lm(formula = reg2[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp2))
-  
-  }
+  assign(paste(i,"reg_model1", sep = ""), lm(formula = reg1[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M + BARC_US_CORP_HY_10Y + Bid_ask,  data = independent_comp1))
+  assign(paste(i, 'reg_model2', sep = ""), lm(formula = reg2[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M + BARC_US_CORP_HY_10Y  + Bid_ask, data = independent_comp2))
+  rm(normalmix, segmented, independent_comp1, independent_comp2)
+}
+
+colnames(daily_independent_returns)
+
+
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
