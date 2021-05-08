@@ -16,6 +16,7 @@ library("mixtools")
 library("stargazer")
 library("alphastable")
 library("midasr")
+library("data.table")
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice/Clean Data", 
@@ -72,18 +73,44 @@ rm(z)
 
 # Data Exploration --------------------------------------------------------
 
-#summary statistics
-summary_stats <- summary(spot_rates)
+#summary statistics for spot returns
+summary_spot <- summarise_all(spot_rates_returns[,c("CHF.USD", "CHF.GBP", "CHF.EUR", "CHF.JPY")],
+                               funs(min, mean, max, count = length))
+summary_spot_clean <- data.frame(min = c(summary_spot[1,1], summary_spot[1,2], summary_spot[1,3], summary_spot[1,4]),
+                            mean = c(summary_spot[1,5], summary_spot[1,6], summary_spot[1,7], summary_spot[1,8]),
+                            max = c(summary_spot[1,9], summary_spot[1,10], summary_spot[1,11], summary_spot[1,12]),
+                            count = c(summary_spot[1,13], summary_spot[1,14], summary_spot[1,15], summary_spot[1,16]))
+rownames(summary_spot_clean) <- c("CHF.USD", "CHF.GBP", "CHF.EUR", "CHF.JPY")
+stargazer(summary_spot_clean, summary = F)
+
+#summary statistics for daily independent variables
+summary_independent <- summarise_all(daily_independent_returns[,c("PUT.CALL", "JPM_GLOBAL_FX_VOLA", "US_3M", "SPY")],
+                                     funs(min, mean, max, count = length))
+summary_independent_clean <- data.frame(min = c(summary_independent[1,1], summary_independent[1,2], summary_independent[1,3], summary_independent[1,4]),
+                                 mean = c(summary_independent[1,5], summary_independent[1,6], summary_independent[1,7], summary_independent[1,8]),
+                                 max = c(summary_independent[1,9], summary_independent[1,10], summary_independent[1,11], summary_independent[1,12]),
+                                 count = c(summary_independent[1,13], summary_independent[1,14], summary_independent[1,15], summary_independent[1,16]))
+rownames(summary_independent_clean) <- c("PUT.CALL", "JPM_VOLA", "US_3M", "SPY")
+stargazer(summary_independent_clean, summary = F)
+
 
 #histogram of FX returns
+hist_plots = list()
 for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
-  hist(spot_rates_returns[,i], breaks = 200, main = i)
+  n = ggplot(spot_rates_returns, aes(x=spot_rates_returns[,i])) +
+  geom_histogram(color="black", fill="red", alpha = 0.5, bins = 100) +
+    geom_vline(xintercept = mean(spot_rates_returns[,i])) + theme_economist_white(gray_bg = F) + xlab("")
+  hist_plots[[i]] = n
+  ggsave(n, file=paste0("hist_", i,".png"), width = 14, height = 10, units = "cm")
 }
 
-#qq-plots to justify selection of distribution
+#qq-plots of FX returns
+qq_plots = list()
 for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
-  qqnorm(spot_rates_returns[,i], pch = 1, frame = FALSE, main = i)
-  qqline(spot_rates_returns[,i], col = "steelblue", lwd = 2)
+  j = ggplot(spot_rates_returns, aes(sample=spot_rates_returns[,i])) +
+  stat_qq(color = "red", alpha = 0.5) + stat_qq_line() + theme_economist_white(gray_bg = F)
+  qq_plots[[i]] <- j
+  ggsave(j, file=paste0("qq_", i,".png"), width = 14, height = 10, units = "cm")
 }
 
 #plotting classification into "business as usual" and crisis
@@ -133,7 +160,7 @@ independent_comp1 <- daily_independent_returns[which(CHFEUR_segmented$matching_c
 independent_comp2 <- daily_independent_returns[which(CHFEUR_segmented$matching_col != head(daily_independent_returns$dates,5479)),]
 
 #run regressions on each data set
-reg_model <- lm(formula = CHFEUR_reg1$CHF.EUR ~ . -dates - MSCI - DE_3M-US_2Y - US_3M - DE_3M - DE_2Y - MOVE_1M - MOVE_3M - JPM_EM_FX_VOLA_1M - JPM_G10_FX_VOLA_1M, data = independent_comp1)
+reg_model <- lm(formula = CHFEUR_reg1$CHF.EUR ~ VIX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp1)
 reg_model2 <- lm(formula = CHFEUR_reg2$CHF.EUR ~ . -dates - MSCI - DE_3M-US_2Y - US_3M - DE_3M - DE_2Y - MOVE_1M - MOVE_3M - JPM_EM_FX_VOLA_1M - JPM_G10_FX_VOLA_1M - CITI_ECONOMIC_SURPRISE, data = independent_comp2)
 
 CHFGBP_normalmix <- normalmixEM(spot_rates_returns[1:5479, "CHF.GBP"])
