@@ -121,6 +121,7 @@ significant_dates <- read.table(textConnection(
 2005-07-07, Terrorist Attack
 2010-05-06, Flash Crash
 2013-04-23, Flash Crash
+2015-01-15, SNB Floor
 2015-11-13, Terrorist Attack
 2017-05-22, Terrorist Attack"), sep=',', colClasses = c("Date", "character"), header=TRUE)
 
@@ -134,9 +135,9 @@ for (i in mixture_plots) {
   eval(parse(text=str1))
   mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
     geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white(gray_bg = F)+
-    ggtitle(" ") + labs(y = "Spot Rate Return", x= "", color = "Event Type") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
+    ggtitle(" ") + labs(y = "Spot Rate Return", x= "", color = "") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
   mix_plots_list[[i]] = mix_plot
-  ggsave(mix_plot, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
+  ggsave(mix_plot, file=paste0("mixplot_", i,".png"), width = 14, height = 10, units = "cm")
 }
 
 # Finite Gaussian Mixture  ------------------------------------------------
@@ -161,24 +162,7 @@ independent_comp2 <- daily_independent_returns[which(CHFEUR_segmented$matching_c
 
 #run regressions on each data set
 reg_model <- lm(formula = CHFEUR_reg1$CHF.EUR ~ VIX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp1)
-reg_model2 <- lm(formula = CHFEUR_reg2$CHF.EUR ~ . -dates - MSCI - DE_3M-US_2Y - US_3M - DE_3M - DE_2Y - MOVE_1M - MOVE_3M - JPM_EM_FX_VOLA_1M - JPM_G10_FX_VOLA_1M - CITI_ECONOMIC_SURPRISE, data = independent_comp2)
-
-CHFGBP_normalmix <- normalmixEM(spot_rates_returns[1:5479, "CHF.GBP"])
-CHFGBP_segmented <- as.data.frame(spot_rates_returns[1:5479, c("CHF.GBP", "dates")])
-CHFGBP_segmented$component <- ifelse(CHFGBP_normalmix$posterior[,1]<0.5, "1", "2")
-CHFGBP_segmented$matching_col <-as.Date(ifelse(CHFGBP_segmented$component== "1", CHFGBP_segmented$dates, 0))
-
-CHFGBP_reg1 <- CHFGBP_segmented[CHFGBP_segmented$component == "1",]
-CHFGBP_reg2 <- CHFGBP_segmented[CHFGBP_segmented$component == "2",]
-independent_comp1_GBP <- daily_independent_returns[which(CHFGBP_segmented$matching_col == head(daily_independent_returns$dates,5479)),]
-independent_comp2_GBP <- daily_independent_returns[which(CHFGBP_segmented$matching_col != head(daily_independent_returns$dates,5479)),]
-
-#run regressions on each data set
-reg_model_GBP <- lm(formula = CHFGBP_reg1$CHF.GBP ~ . -dates - DE_3M, data = independent_comp1_GBP)
-reg_model2_GBP <- lm(formula = CHFGBP_reg2$CHF.GBP ~ . -dates - DE_3M - CITI_ECONOMIC_SURPRISE, data = independent_comp2_GBP)
-
-summary(lm(formula = spot_rates_returns$CHF.USD ~ . -dates - DE_3M - CITI_ECONOMIC_SURPRISE -MSCI - US_2Y - US_3M - DE_2Y - MOVE_1M - MOVE_3M - JPM_EM_FX_VOLA_1M, data = head(daily_independent_returns, 5479)))
-
+reg_model2 <- lm(formula = CHFEUR_reg2$CHF.EUR ~ VIX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp2)
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
