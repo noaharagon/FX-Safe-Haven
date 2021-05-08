@@ -26,7 +26,7 @@ setwd(Paths[Sys.info()[7]])
 
 #Data 
 bid_ask = read.csv('Bid_Ask_Clean.csv')
-#bid_ask = bid_ask[nrow(bid_ask):1,]
+bid_ask = bid_ask[2:nrow(bid_ask),]
 row.names(bid_ask) <- NULL
 spot_rates = read.csv('Spot_Rates_Clean.csv')
 spot_rates$dates <- as.Date(spot_rates$dates)
@@ -161,6 +161,10 @@ for (i in c("CHF.EUR", "CHF.USD")){
   reg2 = segmented[segmented$component == "2",]
   independent_comp1 = daily_independent_returns[which(segmented$matching_col == head(daily_independent_returns$dates,5479)),]
   independent_comp2 = daily_independent_returns[which(segmented$matching_col != head(daily_independent_returns$dates,5479)),]
+  
+  #add bid_ask to independent variables
+  independent_comp1$bid_ask = bid_ask[which(segmented$matching_col == bid_ask$Date), paste0("X.",i)]
+  independent_comp2$bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]
   
   #run regressions on each data set
   assign(paste(i,"reg_model1", sep = ""), lm(formula = reg1[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M, data = independent_comp1))
