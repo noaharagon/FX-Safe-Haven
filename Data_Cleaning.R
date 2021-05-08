@@ -87,6 +87,11 @@ bid_ask <- bid_ask %>% relocate("Date", .before = colnames(bid_ask)[1]) #put dat
 bid_ask = bid_ask[5485:6,] #reverse order to make it chronological as other variables
 bid_ask = na.locf(bid_ask)
 
+bid_ask = bid_ask[2:nrow(bid_ask),]
+row.names(bid_ask) <- NULL
+colnames(bid_ask)[3] <- "X.CHF.EUR"
+colnames(bid_ask)[5] <- "X.CHF.JPY"
+
 #compute log returns of spot rates
 #difflog <- function(x){
 #  diff(log(x))}

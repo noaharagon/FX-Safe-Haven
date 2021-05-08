@@ -26,8 +26,6 @@ setwd(Paths[Sys.info()[7]])
 
 #Data 
 bid_ask = read.csv('Bid_Ask_Clean.csv')
-bid_ask = bid_ask[2:nrow(bid_ask),]
-row.names(bid_ask) <- NULL
 spot_rates = read.csv('Spot_Rates_Clean.csv')
 spot_rates$dates <- as.Date(spot_rates$dates)
 spot_rates_returns = read.csv('Spot_Rates_Returns_Clean.csv')
@@ -167,8 +165,8 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY")){
   independent_comp2$Bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]
   
   #run regressions on each data set
-  assign(paste(i,"reg_model1", sep = ""), lm(formula = reg1[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M + BARC_US_CORP_HY_10Y + Bid_ask,  data = independent_comp1))
-  assign(paste(i, 'reg_model2', sep = ""), lm(formula = reg2[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M + BARC_US_CORP_HY_10Y  + Bid_ask, data = independent_comp2))
+  assign(paste0(i,"reg_model1"), lm(formula = reg1[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M + BARC_US_CORP_HY_10Y + Bid_ask,  data = independent_comp1))
+  assign(paste0(i, 'reg_model2'), lm(formula = reg2[,i] ~ VSTOXX + JPM_GLOBAL_FX_VOLA + PUT.CALL + GOLD + US_3M + BARC_US_CORP_HY_10Y  + Bid_ask, data = independent_comp2))
   rm(normalmix, segmented, independent_comp1, independent_comp2)
 }
 
