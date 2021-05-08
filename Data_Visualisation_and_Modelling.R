@@ -150,7 +150,7 @@ CHFEUR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spo
                                                                           , c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[which(grepl("2006-07-19", bid_ask$Date)):5480,3])), k = 2)
 
 #state dependent regression models
-for (i in c("CHF.EUR", "CHF.USD")){
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY")){
   #split data into regimes to run separate regressions
   normalmix = normalmixEM(spot_rates_returns[1:5479, i])
   segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
