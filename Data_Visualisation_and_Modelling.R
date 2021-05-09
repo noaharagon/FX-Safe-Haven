@@ -187,11 +187,12 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.IDR", "C
   reg2 = segmented[segmented$component == "2",]
   independent_comp1 = daily_independent_returns [which(segmented$matching_col == daily_independent_returns$dates[which(grepl("2006-07-19", spot_rates_returns$dates)):5479]),]
   independent_comp2 = daily_independent_returns[which(segmented$matching_col != daily_independent_returns$dates[which(grepl("2006-07-19", spot_rates_returns$dates)):5479]),]
+  bid_ask_2006 = bid_ask[which(grepl("2006-07-19", spot_rates_returns$dates)):5479,]
   
   if (i == c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.IDR", "CHF.BRL")){
     #add bid_ask to independent variables
-    independent_comp1$Bid_ask = bid_ask[which(segmented$matching_col == bid_ask$Date), paste0("X.",i)]
-    independent_comp2$Bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]  
+    independent_comp1$Bid_ask = bid_ask_2006[which(segmented$matching_col == bid_ask_2006$Date), paste0("X.",i)]
+    independent_comp2$Bid_ask = bid_ask_2006[which(segmented$matching_col != bid_ask_2006$Date), paste0("X.",i)]  
     
     #run regressions on each data set
     assign(paste0(i,"reg_model1_2006"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask,  data = independent_comp1))
