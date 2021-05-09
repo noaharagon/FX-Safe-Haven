@@ -188,26 +188,16 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
     #add bid_ask to independent variables
     independent_comp1$Bid_ask = bid_ask_2006[which(segmented$matching_col == bid_ask_2006$Date), paste0("X.",i)]
     independent_comp2$Bid_ask = bid_ask_2006[which(segmented$matching_col != bid_ask_2006$Date), paste0("X.",i)]  
-    
+    colnames(daily_independent_returns)
     #run regressions on each data set
-    assign(paste0(i,"reg_model1_2006"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2006'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask, data = independent_comp2))
+    assign(paste0(i,"reg_model1_2006"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y,  data = independent_comp1))
+    assign(paste0(i, 'reg_model2_2006'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y, data = independent_comp2))
     } else {
-    assign(paste0(i,"reg_model1_2006"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2006'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y, data = independent_comp2))
+    assign(paste0(i,"reg_model1_2006"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y,  data = independent_comp1))
+    assign(paste0(i, 'reg_model2_2006'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y, data = independent_comp2))
     }
-  
     rm(normalmix, segmented, independent_comp1, independent_comp2)
     }
-
-
-
-
-
-
-
-
-
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
