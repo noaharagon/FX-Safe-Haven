@@ -102,7 +102,7 @@ diffsimple <- function(x){
 #Take inverse to make CHF rates consistent
 spot_rates[c(5,7,9,11)] = 1/spot_rates[c(5,7,9,11)]
 #FX CHF/USD meaning how many CHF you can get for 1 USD, up means depreciate CHF (appreciate USD), down means appreciate CHF (depreciate USD)
-names(spot_rates) = c('dates', 'CHF/USD', 'CHF/GBP', 'CHF/EUR', 'CHF/JPY', 'JPY/USD', 'CHF/NOK', 'NOK/USD', 'CHF/BRL', 'BRL/USD', 'CHF/IDR', 'IDR/USD')
+names(spot_rates) = c('dates', 'CHF/USD', 'CHF/GBP', 'CHF/EUR', 'CHF/JPY', 'JPY/USD', 'CHF/NOK', 'NOK/USD', 'CHF/BRL', 'BRL/USD', 'CHF/INR', 'INR/USD')
 
 spot_rates_returns <- as.data.frame(sapply(spot_rates[,2:ncol(spot_rates)], diffsimple))
 spot_rates_returns = add_column(spot_rates_returns, dates = spot_rates[2:nrow(spot_rates), "dates"] ,.before = 1)

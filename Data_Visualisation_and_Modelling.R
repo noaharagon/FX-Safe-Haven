@@ -140,17 +140,8 @@ for (i in mixture_plots) {
 
 # Finite Gaussian Mixture  ------------------------------------------------
 
-#reg mixture for CHF/EUR with all daily variables beginning 2000
-CHFEUR_reg_2000 <- regmixEM(y = spot_rates_returns[1:5479, "CHF.EUR"], x = as.matrix(cbind(daily_independent_returns[1:5479, c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[2:5480,3])), k = 2)
-
-CHFEUR_reg_2006 <- regmixEM(y = spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, "CHF.EUR"], 
-                            x = as.matrix(cbind(daily_independent_returns[which(grepl("2006-07-19", daily_independent_returns$dates)):5479
-                                                                          , c(2:7,9:11,13,14,16,17,20,23,25)], bid_ask[which(grepl("2006-07-19", bid_ask$Date)):5480,3])), k = 2)
-
-
-
 #state dependent regression models
-for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.IDR", "CHF.BRL", "JPY.USD", "BRL.USD", "IDR.USD")){
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
   #split data into regimes to run separate regressions
   normalmix = normalmixEM(spot_rates_returns[1:5479, i])
   segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
@@ -176,7 +167,7 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.IDR", "C
 
 
 #state dependent regression models
-for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.IDR", "CHF.BRL", "JPY.USD", "BRL.USD", "IDR.USD")){
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
   #split data into regimes to run separate regressions
   normalmix = normalmixEM(spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, i])
   segmented = as.data.frame(spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, c(i, "dates")])
@@ -189,7 +180,7 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.IDR", "C
   independent_comp2 = daily_independent_returns[which(segmented$matching_col != daily_independent_returns$dates[which(grepl("2006-07-19", spot_rates_returns$dates)):5479]),]
   bid_ask_2006 = bid_ask[which(grepl("2006-07-19", spot_rates_returns$dates)):5479,]
   
-  if (i == c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.IDR", "CHF.BRL")){
+  if (i == c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL")){
     #add bid_ask to independent variables
     independent_comp1$Bid_ask = bid_ask_2006[which(segmented$matching_col == bid_ask_2006$Date), paste0("X.",i)]
     independent_comp2$Bid_ask = bid_ask_2006[which(segmented$matching_col != bid_ask_2006$Date), paste0("X.",i)]  
