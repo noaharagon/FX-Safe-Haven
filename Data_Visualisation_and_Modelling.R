@@ -154,8 +154,13 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   independent_comp2 = daily_independent_returns[which(segmented$matching_col != head(daily_independent_returns$dates,5479)),]
   
   #to investigate state of "crisis" vs "business as usual" add stats on independent vars by mixture component
-  assign(paste0(i, "_threshold_vars"), data.frame(comp1 = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x)sd(x, na.rm = T)), 
-                                                 comp2 = sapply(independent_comp2[,2:ncol(independent_comp2)], function(x)sd(x, na.rm = T))))
+  #assign(paste0(i, "_threshold_vars"), data.frame(comp1 = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x)max(x, na.rm = T)), 
+  #                                               comp2 = sapply(independent_comp2[,2:ncol(independent_comp2)], function(x)max(x, na.rm = T))))
+  
+  
+  assign(paste0(i, "_threshold_vars"), data.frame(comp1_up = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) min(x[which(x>0)],na.rm = T)), 
+                                                  comp1_down = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) max(x[which(x<0)],na.rm = T) )))
+  
   
   if (i %in% c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL")){
     #add bid_ask to independent variables
@@ -163,46 +168,23 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
     independent_comp2$Bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]
   
   #run regressions on each data set
-    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + BARC_US_CORP_HY_10Y  + Bid_ask,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + BARC_US_CORP_HY_10Y + Bid_ask, data = independent_comp2))
+    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y  + Bid_ask,  data = independent_comp1))
+    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask, data = independent_comp2))
   } else {
-    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y ,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y , data = independent_comp2))
+    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y ,  data = independent_comp1))
+    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y , data = independent_comp2))
     } 
   rm(normalmix, segmented, independent_comp1, independent_comp2, reg1, reg2)
 }
 
-#stargazer to create LaTeX table of results
-stargazer(eval(stargazer_list))
 
-#state dependent regression models
-for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
-  #split data into regimes to run separate regressions
-  normalmix = normalmixEM(spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, i])
-  segmented = as.data.frame(spot_rates_returns[which(grepl("2006-07-19", spot_rates_returns$dates)):5479, c(i, "dates")])
-  segmented$component = ifelse(normalmix$posterior[,1]<0.5, "1", "2")
-  segmented$matching_col = as.Date(ifelse(segmented$component== "1", segmented$dates, 0))
-  
-  reg1 = segmented[segmented$component == "1",]
-  reg2 = segmented[segmented$component == "2",]
-  independent_comp1 = daily_independent_returns [which(segmented$matching_col == daily_independent_returns$dates[which(grepl("2006-07-19", spot_rates_returns$dates)):5479]),]
-  independent_comp2 = daily_independent_returns[which(segmented$matching_col != daily_independent_returns$dates[which(grepl("2006-07-19", spot_rates_returns$dates)):5479]),]
-  bid_ask_2006 = bid_ask[which(grepl("2006-07-19", spot_rates_returns$dates)):5479,]
-  
-  if (i %in% c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL")){
-    #add bid_ask to independent variables
-    independent_comp1$Bid_ask = bid_ask_2006[which(segmented$matching_col == bid_ask_2006$Date), paste0("X.",i)]
-    independent_comp2$Bid_ask = bid_ask_2006[which(segmented$matching_col != bid_ask_2006$Date), paste0("X.",i)]  
-    colnames(daily_independent_returns)
-    #run regressions on each data set
-    assign(paste0(i,"reg_model1_2006"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2006'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y, data = independent_comp2))
-    } else {
-    assign(paste0(i,"reg_model1_2006"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2006'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + TED_SPREAD  + GS_COMMODITY_VOLA + CDX_EUROPE_IG_10Y, data = independent_comp2))
-    }
-    rm(normalmix, segmented, independent_comp1, independent_comp2)
-    }
+
+#stargazer to create LaTeX table of results
+stargazer(CHF.EURreg_model1_2000, CHF.GBPreg_model1_2000, CHF.USDreg_model1_2000, CHF.JPYreg_model1_2000, CHF.BRLreg_model1_2000, CHF.INRreg_model1_2000, CHF.NOKreg_model1_2000, JPY.USDreg_model1_2000, INR.USDreg_model1_2000, BRL.USDreg_model1_2000, 
+          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions non-crisis period")
+
+stargazer(CHF.EURreg_model2_2000, CHF.GBPreg_model2_2000, CHF.USDreg_model2_2000, CHF.JPYreg_model2_2000, CHF.BRLreg_model2_2000, CHF.INRreg_model2_2000, CHF.NOKreg_model2_2000, JPY.USDreg_model2_2000, INR.USDreg_model2_2000, BRL.USDreg_model2_2000, 
+          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions crisis period")
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
