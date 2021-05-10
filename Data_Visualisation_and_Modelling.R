@@ -169,9 +169,6 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   rm(normalmix, segmented, independent_comp1, independent_comp2)
 }
 
-library(quantmod)
-getSymbols( "TEDRATE" , src = "FRED", from = "2000-03-20" , to = "2021-03-18" , adjust = TRUE)
-
 
 #state dependent regression models
 for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
