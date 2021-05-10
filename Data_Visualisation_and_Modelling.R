@@ -158,8 +158,8 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   #                                               comp2 = sapply(independent_comp2[,2:ncol(independent_comp2)], function(x)max(x, na.rm = T))))
   
   
-  assign(paste0(i, "_threshold_vars"), data.frame(comp1_up = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) min(x[which(x>0)],na.rm = T)), 
-                                                  comp1_down = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) max(x[which(x<0)],na.rm = T) )))
+  assign(paste0(i, "_threshold_vars"), data.frame(comp1_up = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) mean(x[which(x>0)],na.rm = T)), 
+                                                  comp1_down = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) mean(x[which(x<0)],na.rm = T) )))
   
   
   if (i %in% c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL")){
@@ -174,10 +174,8 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
     assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y ,  data = independent_comp1))
     assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y , data = independent_comp2))
     } 
-  rm(normalmix, segmented, independent_comp1, independent_comp2, reg1, reg2)
+  rm(normalmix, segmented, reg1, reg2)
 }
-
-
 
 #stargazer to create LaTeX table of results
 stargazer(CHF.EURreg_model1_2000, CHF.GBPreg_model1_2000, CHF.USDreg_model1_2000, CHF.JPYreg_model1_2000, CHF.BRLreg_model1_2000, CHF.INRreg_model1_2000, CHF.NOKreg_model1_2000, JPY.USDreg_model1_2000, INR.USDreg_model1_2000, BRL.USDreg_model1_2000, 
@@ -185,6 +183,9 @@ stargazer(CHF.EURreg_model1_2000, CHF.GBPreg_model1_2000, CHF.USDreg_model1_2000
 
 stargazer(CHF.EURreg_model2_2000, CHF.GBPreg_model2_2000, CHF.USDreg_model2_2000, CHF.JPYreg_model2_2000, CHF.BRLreg_model2_2000, CHF.INRreg_model2_2000, CHF.NOKreg_model2_2000, JPY.USDreg_model2_2000, INR.USDreg_model2_2000, BRL.USDreg_model2_2000, 
           column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions crisis period")
+
+#EXPERIMENTAL THRESHOLD VALUE
+quantile(independent_comp1$VIX[which(independent_comp1$VIX>0)],0.25)*100
 
 #LaTeX Table Preparation
 CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
