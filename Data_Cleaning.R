@@ -10,6 +10,7 @@ library("stringr")
 library("xts")
 library("zoo")
 library("tibble")
+library("quantmod")
 
 #setting working directory
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice/Raw Data", 
@@ -24,6 +25,10 @@ spot_rates <- read_excel("FXData.xlsx", sheet='SpotRates')
 stable_coins <- read_excel("FXData.xlsx", sheet='StableCoins')
 independent <- read_excel("FXData.xlsx", sheet='IndependentVars')
 spreads <- read_excel("FXData.xlsx", sheet='Spreads')
+
+#Load TED Spread
+getSymbols( "TEDRATE" , src = "FRED", adjust = TRUE)
+TEDRATE = TEDRATE["2000-03-17/2021-03-19"]
 
 #Create DataFrame
 spot_rates <- as.data.frame(spot_rates)
@@ -55,7 +60,7 @@ datacleanup <- function(data){
 
 spot_rates <- datacleanup(spot_rates)
 
-rm(list=setdiff(ls(), c("spot_rates",'spreads','stable_coins','independent', "datacleanup")))
+rm(list=setdiff(ls(), c("spot_rates",'spreads','stable_coins','independent', "datacleanup", "TEDRATE")))
 
 #Crossrates
 for (i in c("JAPANESE YEN TO US $ (WMR) - EXCHANGE RATE",'NORWEGIAN KRONE TO US $ (WMR) - EXCHANGE RATE',
@@ -131,7 +136,7 @@ monthly_independent <- select(monthly_independent, -5)
 
 #monthly_independent <- datacleanup(monthly_independent)
 rm(list=setdiff(ls(),c('daily_independent', 'independent','spot_rates_returns', "spot_rates",
-                       'stable_coins', "datacleanup", "weekly_independent", "monthly_independent", "bid_ask", "diffsimple")))
+                       'stable_coins', "datacleanup", "weekly_independent", "monthly_independent", "bid_ask", "diffsimple", "TEDRATE")))
 
 # Convert to numeric and Remove CDX & Last Price
 daily_independent[,2:ncol(daily_independent)] <- sapply(daily_independent[,2:ncol(daily_independent)], as.numeric)
@@ -154,9 +159,13 @@ rm(x,i)
 
 daily_independent = na.locf(daily_independent, na.rm = F)
 
+#replace ted spread with full time series since 2000
+daily_independent$`TED SPREAD RATE - MIDDLE RATE` = TEDRATE$TEDRATE
+
 #Create return datasets from independent variables
 daily_independent_returns = as.data.frame(sapply(daily_independent[2:ncol(daily_independent)], diffsimple))
 daily_independent_returns = add_column(daily_independent_returns, dates = daily_independent[2:nrow(daily_independent), "dates"] ,.before = 1)
+daily_independent_returns[is.na(daily_independent_returns$`TED SPREAD RATE - MIDDLE RATE`), "TED SPREAD RATE - MIDDLE RATE"] = 0
 names(daily_independent_returns)[2:ncol(daily_independent_returns)] = c('MSCI', 'SPY', 'US_2Y', 'US_10Y', 'US_3M', 'DE_10Y','DE_3M', 'DE_2Y', 'PUT/CALL', 'VIX','TED_SPREAD', 'MOVE_1M', 
                                     'MOVE_3M', 'MOVE_6M', 'VSTOXX', 'GOLD', 'CITI_ECONOMIC_SURPRISE', 'GS_COMMODITY_VOLA', 'JPM_GLOBAL_FX_VOLA', 'JPM_EM_FX_VOLA_1M',
                                     'JPM_G10_FX_VOLA_1M', '10Y_BREAKEVEN', 'CDX_EUROPE_IG_10Y', 'BARC_US_CORP_HY_10Y')
