@@ -192,7 +192,18 @@ stargazer(CHF.EURreg_model2_2000, CHF.GBPreg_model2_2000, CHF.USDreg_model2_2000
 #EXPERIMENTAL THRESHOLD VALUE
 quantile(independent_comp1$VIX[which(independent_comp1$VIX>0)],0.25)*100
 #EXPERIMENTAL
-normalmix = normalmixEM(spot_rates_returns[1:5479, 'CHF.EUR'])[c('lambda', 'sigma', 'loglik')] 
+
+#NO IDEA FCK ME
+d = data.frame(matrix(NA, nrow = 1, ncol = 2))
+
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
+  #assign(paste0(i,"reg_model1_2000") , normalmixEM(spot_rates_returns[1:5479, i])[c('lambda')])
+  d = do.call(cbind, Map(data.frame, A=d, B=normalmixEM(spot_rates_returns[1:5479, i])[c('lambda')]))
+  }
+
+
+  
+
 
 #treshold values in latex
 rel_thres = c( 'PUT.CALL', 'VIX', "VSTOXX", 'TED_SPREAD', 'GOLD', 'JPM_GLOBAL_FX_VOLA', 'BARC_US_CORP_HY_10')
