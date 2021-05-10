@@ -193,16 +193,19 @@ stargazer(CHF.EURreg_model2_2000, CHF.GBPreg_model2_2000, CHF.USDreg_model2_2000
 quantile(independent_comp1$VIX[which(independent_comp1$VIX>0)],0.25)*100
 #EXPERIMENTAL
 
-#NO IDEA FCK ME
-d = data.frame(matrix(NA, nrow = 1, ncol = 2))
-
+#Save Lambda and Sigma Parameters of Mixture
+comp1_list = list()
+comp2_list = list()
 for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
-  #assign(paste0(i,"reg_model1_2000") , normalmixEM(spot_rates_returns[1:5479, i])[c('lambda')])
-  d = do.call(cbind, Map(data.frame, A=d, B=normalmixEM(spot_rates_returns[1:5479, i])[c('lambda')]))
+  mix_object = normalmixEM(spot_rates_returns[1:5479, i], k = 2)
+  comp1_list[[i]] = c(mix_object$lambda[1], mix_object$sigma[1])
+  comp2_list[[i]] = c(mix_object$lambda[2], mix_object$sigma[2])
   }
-
-
-  
+final_table = do.call(rbind, Map(data.frame, A=comp1_list, B=comp2_list))
+colnames(final_table) = c("Component 1", "Component 2")
+row.names(final_table)[seq(1,20,2)] = paste0(row.names(final_table)[seq(1,20,2)], "lambda")
+row.names(final_table)[seq(2,20,2)] = paste(row.names(final_table)[seq(2,20,2)],"sigma")
+row.names(final_table) = gsub('[0-9]+', '', row.names(final_table))
 
 
 #treshold values in latex
