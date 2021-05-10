@@ -169,6 +169,9 @@ daily_independent_returns[is.na(daily_independent_returns$`TED SPREAD RATE - MID
 names(daily_independent_returns)[2:ncol(daily_independent_returns)] = c('MSCI', 'SPY', 'US_2Y', 'US_10Y', 'US_3M', 'DE_10Y','DE_3M', 'DE_2Y', 'PUT/CALL', 'VIX','TED_SPREAD', 'MOVE_1M', 
                                     'MOVE_3M', 'MOVE_6M', 'VSTOXX', 'GOLD', 'CITI_ECONOMIC_SURPRISE', 'GS_COMMODITY_VOLA', 'JPM_GLOBAL_FX_VOLA', 'JPM_EM_FX_VOLA_1M',
                                     'JPM_G10_FX_VOLA_1M', '10Y_BREAKEVEN', 'CDX_EUROPE_IG_10Y', 'BARC_US_CORP_HY_10Y')
+names(daily_independent)[2:ncol(daily_independent)] = c('MSCI', 'SPY', 'US_2Y', 'US_10Y', 'US_3M', 'DE_10Y','DE_3M', 'DE_2Y', 'PUT/CALL', 'VIX','TED_SPREAD', 'MOVE_1M', 
+                                                                'MOVE_3M', 'MOVE_6M', 'VSTOXX', 'GOLD', 'CITI_ECONOMIC_SURPRISE', 'GS_COMMODITY_VOLA', 'JPM_GLOBAL_FX_VOLA', 'JPM_EM_FX_VOLA_1M',
+                                                                'JPM_G10_FX_VOLA_1M', '10Y_BREAKEVEN', 'CDX_EUROPE_IG_10Y', 'BARC_US_CORP_HY_10Y')
 
 weekly_independent_returns = as.data.frame(sapply(weekly_independent, diffsimple))
 weekly_independent_returns$dates = weekly_independent[2:nrow(weekly_independent), "dates"]
@@ -191,6 +194,7 @@ write.csv(bid_ask, 'Bid_Ask_Clean.csv', row.names = FALSE)
 write.csv(spot_rates, 'Spot_Rates_Clean.csv',row.names = FALSE)
 write.csv(spot_rates_returns, 'Spot_Rates_Returns_Clean.csv', row.names = FALSE)
 write.csv(daily_independent_returns, 'Daily_Independent_Returns_Clean.csv',row.names = FALSE)
+write.csv(daily_independent, "Daily_Independent.csv", row.names = FALSE)
 write.csv(weekly_independent_returns, 'Weekly_Independent_Returns_Clean.csv',row.names = FALSE)
 write.csv(monthly_independent_returns, 'Monthly_Independent_Returns_Clean.csv', row.names = FALSE)
 

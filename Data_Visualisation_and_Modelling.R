@@ -163,11 +163,11 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
     independent_comp2$Bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]
   
   #run regressions on each data set
-    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + BARC_US_CORP_HY_10Y  + Bid_ask,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + BARC_US_CORP_HY_10Y + Bid_ask, data = independent_comp2))
+    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + BARC_US_CORP_HY_10Y  + TED_SPREAD + Bid_ask,  data = independent_comp1))
+    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + BARC_US_CORP_HY_10Y + TED_SPREAD + Bid_ask, data = independent_comp2))
   } else {
-    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y ,  data = independent_comp1))
-    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y , data = independent_comp2))
+    assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + TED_SPREAD,  data = independent_comp1))
+    assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + TED_SPREAD, data = independent_comp2))
     } 
   rm(normalmix, segmented, independent_comp1, independent_comp2, reg1, reg2)
 }
