@@ -146,6 +146,9 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   normalmix = normalmixEM(spot_rates_returns[1:5479, i])
   segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
   
+  if(normalmix$lambda[1] > normalmix$lambda[2]){
+    normal$posterior = normal$posterior[,c(2,1)]
+  }
   
   segmented$component = ifelse(normalmix$posterior[,1]<0.5, "1", "2")
   segmented$matching_col = as.Date(ifelse(segmented$component== "1", segmented$dates, 0))
@@ -234,15 +237,15 @@ stargazer(CHF.EURreg_model2, CHF.GBPreg_model2, CHF.USDreg_model2, CHF.JPYreg_mo
           column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions non-crisis period")
 
 
-#EXPERIMENTAL THRESHOLD VALUE
-quantile(independent_comp1$VIX[which(independent_comp1$VIX>0)],0.25)*100
-#EXPERIMENTAL
-
 #threshold values in latex
 rel_thres = c( 'PUT.CALL', 'VIX', "VSTOXX", 'TED_SPREAD', 'GOLD', 'JPM_GLOBAL_FX_VOLA', 'BARC_US_CORP_HY_10')
-stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,]*100, CHF.GBP_threshold_vars[rel_thres,]*100, CHF.USD_threshold_vars[rel_thres,]*100, CHF.JPY_threshold_vars[rel_thres,]*100, CHF.BRL_threshold_vars[rel_thres,]*100, CHF.INR_threshold_vars[rel_thres,]*100,
-                CHF.NOK_threshold_vars[rel_thres,]*100, JPY.USD_threshold_vars[rel_thres,]*100, INR.USD_threshold_vars[rel_thres,]*100, BRL.USD_threshold_vars[rel_thres,]*100)
-          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Treshold values')
+stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,][,1]*100, CHF.GBP_threshold_vars[rel_thres,][,1]*100, CHF.USD_threshold_vars[rel_thres,][,1]*100, CHF.JPY_threshold_vars[rel_thres,][,1]*100, CHF.BRL_threshold_vars[rel_thres,][,1]*100, CHF.INR_threshold_vars[rel_thres,][,1]*100,
+                CHF.NOK_threshold_vars[rel_thres,][,1]*100, JPY.USD_threshold_vars[rel_thres,][,1]*100, BRL.USD_threshold_vars[rel_thres,][,1]*100)
+          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Threshold values')
+stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,][,2]*100, CHF.GBP_threshold_vars[rel_thres,][,2]*100, CHF.USD_threshold_vars[rel_thres,][,2]*100, CHF.JPY_threshold_vars[rel_thres,][,2]*100, CHF.BRL_threshold_vars[rel_thres,][,2]*100, CHF.INR_threshold_vars[rel_thres,][,2]*100,
+                CHF.NOK_threshold_vars[rel_thres,][,2]*100, JPY.USD_threshold_vars[rel_thres,][,2]*100, BRL.USD_threshold_vars[rel_thres,][,2]*100)
+          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Threshold values')
+
 
 #threshold plot for CHF.EUR
 threshold_mix = normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)
@@ -265,15 +268,39 @@ for (i in colnames(daily_independent_returns[,2:ncol(daily_independent_returns)]
 }
 
 
-#table of proportions of deviations from threshold
-length(which(independent_thresh1$JPM_GLOBAL_FX_VOLA>CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",1]))/nrow(independent_thresh1)
-length(which(independent_thresh1$JPM_GLOBAL_FX_VOLA<CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",2]))/nrow(independent_thresh1)
-
-length(which(independent_thresh2$JPM_GLOBAL_FX_VOLA>CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",1]))/nrow(independent_thresh2)
-length(which(independent_thresh2$JPM_GLOBAL_FX_VOLA<CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",2]))/nrow(independent_thresh2)
-
-
-#LaTeX Table Preparation
-#CHFEUR_LaTeX_Table = rbind(CHFEUR_reg_2000$lambda,CHFEUR_reg_2000$sigma, CHFEUR_reg_2000$beta)
-#rownames(CHFEUR_LaTeX_Table) = c('Lambda', 'Sigma', 'Intercept',colnames(daily_independent_returns[c(2:7,9:11,13,14,16,17,20,23,25)]),'Bid-Ask')
-#stargazer(CHFEUR_LaTeX_Table)
+#table of proportions of deviations from threshold (loop through currencies and independent vars)
+currency_thresh_list = list()
+independent_var_thresh_list = list()
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")){
+  proportion_mix = normalmixEM(spot_rates_returns[1:5479, i], k = 2)
+  #
+  if(proportion_mix$lambda[1] > proportion_mix$lambda[2]){
+    proportion_mix$posterior = proportion_mix$posterior[,c(2,1)]
+  }
+  proportion_df = spot_rates_returns[,c(i, "dates")]
+  proportion_df$component = ifelse(proportion_mix$posterior[,1]<0.5, '2', '1')
+  proportion_df$matching_col = as.Date(ifelse(proportion_df$component== "1", proportion_df$dates, 0))
+  independent_thresh1 = daily_independent_returns[which(proportion_df$matching_col == head(daily_independent_returns$dates,5479)), ]
+  independent_thresh2 = daily_independent_returns[which(proportion_df$matching_col != head(daily_independent_returns$dates,5479)), ]
+  independent_thresh1$component = 1
+  independent_thresh2$component = 2
+  final_thresh = rbind(independent_thresh1, independent_thresh2)
+  final_thresh = final_thresh[order(final_thresh$dates),]
+  for (j in colnames(daily_independent_returns[,2:ncol(daily_independent_returns)])) {
+    
+    #proportion of deviations in crisis period
+    deviation_crisis = c(
+      length(which(independent_thresh1[,j]>eval(parse(text = paste(i,"_threshold_vars", "[", paste("'",j,"'", sep = ""), ",1]", sep = "")))))/nrow(independent_thresh1),
+      length(which(independent_thresh1[,j]<eval(parse(text = paste(i,"_threshold_vars", "[", paste("'",j,"'", sep = ""), ",2]", sep = "")))))/nrow(independent_thresh1)
+    )
+    #proportion of deviations in normal period
+    deviation_normal = c(
+    length(which(independent_thresh2[,j]>eval(parse(text = paste(i,"_threshold_vars", "[", paste("'",j,"'", sep = ""), ",1]", sep = "")))))/nrow(independent_thresh2),
+    length(which(independent_thresh2[,j]<eval(parse(text = paste(i,"_threshold_vars", "[", paste("'",j,"'", sep = ""), ",2]", sep = "")))))/nrow(independent_thresh2)
+    )
+    #add threshold proportions of all currencies
+    deviation_list[[j]] = c(deviation_crisis, deviation_normal)
+  }
+  #add independent threshold proportions per currency
+  currency_thresh_list[[i]] = deviation_list
+}
