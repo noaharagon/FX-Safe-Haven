@@ -147,7 +147,7 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
   
   if(normalmix$lambda[1] > normalmix$lambda[2]){
-    normal$posterior = normal$posterior[,c(2,1)]
+    normalmix$posterior = normalmix$posterior[,c(2,1)]
   }
   
   segmented$component = ifelse(normalmix$posterior[,1]<0.5, "1", "2")
@@ -300,8 +300,8 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
     length(which(independent_thresh2[,j]<eval(parse(text = paste(i,"_threshold_vars", "[", paste("'",j,"'", sep = ""), ",2]", sep = "")))))/nrow(independent_thresh2)
     )
     #add threshold proportions of all currencies
-    deviation_list[[j]] = c(deviation_crisis, deviation_normal)
+    independent_var_thresh_list[[j]] = c(deviation_crisis, deviation_normal)
   }
   #add independent threshold proportions per currency
-  currency_thresh_list[[i]] = deviation_list
+  currency_thresh_list[[i]] = independent_var_thresh_list
 }
