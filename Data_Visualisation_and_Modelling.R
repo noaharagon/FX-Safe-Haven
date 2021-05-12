@@ -89,7 +89,7 @@ summary_independent_clean <- data.frame(min = 100*c(summary_independent[1,1], su
                                  max = 100*c(summary_independent[1,9], summary_independent[1,10], summary_independent[1,11], summary_independent[1,12]),
                                  count = c(summary_independent[1,13], summary_independent[1,14], summary_independent[1,15], summary_independent[1,16]))
 rownames(summary_independent_clean) <- c("Put Call Ratio", "JPM FX Vola", "US 3M T-Bill", "SP500")
-stargazer(rbind(summary_spot_clean,summary_independent_clean), summary = F, notes = "\\textit{Note:}", notes.align = "l")
+stargazer(rbind(summary_spot_clean,summary_independent_clean), summary = F, no.space = T, notes = "\\textit{Note:}", notes.align = "l")
 
 
 #histogram of FX returns
@@ -227,12 +227,13 @@ stargazer(table_normal, no.space = T, summary = F, title = 'Lambda and Sigma Par
 #CRISIS TABLE
 stargazer(CHF.EURreg_model1, CHF.GBPreg_model1, CHF.USDreg_model1, CHF.JPYreg_model1, CHF.BRLreg_model1, CHF.INRreg_model1, CHF.NOKreg_model1, JPY.USDreg_model1, BRL.USDreg_model1, 
           column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, df = F, model.numbers = F, object.names=F, model.names = F, align = T, title = "Regressions crisis period", 
-          notes = "\\parbox[t]{7cm}{Logistic regression. Dependent variable: an indicator varible ... AND Some very long and interesting comment.}")
+          column.sep.width = "-15pt")
 
 
 #NON-CRISIS TABLE
 stargazer(CHF.EURreg_model2, CHF.GBPreg_model2, CHF.USDreg_model2, CHF.JPYreg_model2, CHF.BRLreg_model2, CHF.INRreg_model2, CHF.NOKreg_model2, JPY.USDreg_model2, BRL.USDreg_model2, 
-          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions non-crisis period")
+          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, df = F,  model.numbers = F, object.names=F, model.names = F, align = T, title = "Regressions non-crisis period", 
+          column.sep.width = "-15pt")
 
 
 #threshold values in latex
