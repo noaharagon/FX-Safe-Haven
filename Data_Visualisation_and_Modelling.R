@@ -221,7 +221,8 @@ names(table_normal) = c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "
 row.names(table_normal) = c('Lambda', "Sigma")
 
 #CREATE LAMBDA AND SIGMA LATEX TABLE
-stargazer(table_crisis, no.space = T, summary = F, title = 'Lambda and Sigma Parameter Gaussian Mixture')
+stargazer(table_crisis, no.space = T, summary = F, title = 'Lambda and Sigma Parameter Gaussian Mixture Crisis State')
+stargazer(table_normal, no.space = T, summary = F, title = 'Lambda and Sigma Parameter Gaussian Mixture Non-Crisis State')
 
 
 
@@ -241,12 +242,12 @@ stargazer(CHF.EURreg_model2, CHF.GBPreg_model2, CHF.USDreg_model2, CHF.JPYreg_mo
 rel_thres = c( 'PUT.CALL', 'VIX', "VSTOXX", 'TED_SPREAD', 'GOLD', 'JPM_GLOBAL_FX_VOLA', 'BARC_US_CORP_HY_10')
 stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,][,1]*100, CHF.GBP_threshold_vars[rel_thres,][,1]*100, CHF.USD_threshold_vars[rel_thres,][,1]*100, CHF.JPY_threshold_vars[rel_thres,][,1]*100, CHF.BRL_threshold_vars[rel_thres,][,1]*100, CHF.INR_threshold_vars[rel_thres,][,1]*100,
                 CHF.NOK_threshold_vars[rel_thres,][,1]*100, JPY.USD_threshold_vars[rel_thres,][,1]*100, BRL.USD_threshold_vars[rel_thres,][,1]*100)
-          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Threshold values')
+          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Positive Treshold Values')
 stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,][,2]*100, CHF.GBP_threshold_vars[rel_thres,][,2]*100, CHF.USD_threshold_vars[rel_thres,][,2]*100, CHF.JPY_threshold_vars[rel_thres,][,2]*100, CHF.BRL_threshold_vars[rel_thres,][,2]*100, CHF.INR_threshold_vars[rel_thres,][,2]*100,
                 CHF.NOK_threshold_vars[rel_thres,][,2]*100, JPY.USD_threshold_vars[rel_thres,][,2]*100, BRL.USD_threshold_vars[rel_thres,][,2]*100)
-          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Threshold values')
+          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Negative Treshold Values')
 
-
+ 
 #threshold plot for CHF.EUR
 threshold_mix = normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)
 threshold_df = spot_rates_returns[,c("CHF.EUR", "dates")]
