@@ -203,6 +203,10 @@ comp1_list = list()
 comp2_list = list()
 for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")){
   mix_object = normalmixEM(spot_rates_returns[1:5479, i], k = 2)
+  if(mix_object$lambda[1] > mix_object$lambda[2]){
+    mix_object$lambda = mix_object$lambda[c(2,1)]
+    mix_object$sigma = mix_object$sigma[c(2,1)]
+  }
   comp1_list[[i]] = c(mix_object$lambda[1], mix_object$sigma[1])
   comp2_list[[i]] = c(mix_object$lambda[2], mix_object$sigma[2])
 }
