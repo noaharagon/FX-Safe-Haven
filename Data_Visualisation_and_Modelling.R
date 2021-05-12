@@ -141,7 +141,7 @@ for (i in mixture_plots) {
 # Finite Gaussian Mixture  ------------------------------------------------
 
 #state dependent regression models
-for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")){
   #split data into regimes to run separate regressions
   normalmix = normalmixEM(spot_rates_returns[1:5479, i])
   segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
@@ -182,7 +182,7 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
 
 
 #Rename component 1 as crisis and component 2 as business as usual
-for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")){
   if(summary(get(paste0(i, "reg_model1_2000")))$fstatistic[3] > summary(get(paste0(i, "reg_model2_2000")))$fstatistic[3]){
     
     assign(paste0(i, "reg_model2"), get(paste0(i, "reg_model1_2000")))
@@ -195,45 +195,45 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
 rm(list = c(paste0(i, "reg_model1_2000"),paste0(i, "reg_model2_2000") ))
     }
 
+#Save Lambda and Sigma Parameters of Mixture
+comp1_list = list()
+comp2_list = list()
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")){
+  mix_object = normalmixEM(spot_rates_returns[1:5479, i], k = 2)
+  comp1_list[[i]] = c(mix_object$lambda[1], mix_object$sigma[1])
+  comp2_list[[i]] = c(mix_object$lambda[2], mix_object$sigma[2])
+}
+final_table = do.call(rbind, Map(data.frame, A=comp1_list, B=comp2_list))
+colnames(final_table) = c("Component 1", "Component 2")
+row.names(final_table)[seq(1,18,2)] = paste0(row.names(final_table)[seq(1,18,2)], "lambda")
+row.names(final_table)[seq(2,19,2)] = paste(row.names(final_table)[seq(2,19,2)],"sigma")
+row.names(final_table) = gsub('[0-9]+', '', row.names(final_table))
+
+#Lambda and Ligma for Crisis Period
+table_crisis = rbind(final_table[seq(1,18,2),1], final_table[seq(2,19,2),1]) #first component
+table_normal = rbind(final_table[seq(1,18,2),2], final_table[seq(2,19,2),2]) #second component
 
 #stargazer to create LaTeX table of results
 #CRISIS TABLE
-stargazer(CHF.EURreg_model1, CHF.GBPreg_model1, CHF.USDreg_model1, CHF.JPYreg_model1, CHF.BRLreg_model1, CHF.INRreg_model1, CHF.NOKreg_model1, JPY.USDreg_model1, INR.USDreg_model1, BRL.USDreg_model1, 
-          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, model.numbers = F, object.names=F, model.names = F, align = T, title = "Regressions crisis period", 
+stargazer(CHF.EURreg_model1, CHF.GBPreg_model1, CHF.USDreg_model1, CHF.JPYreg_model1, CHF.BRLreg_model1, CHF.INRreg_model1, CHF.NOKreg_model1, JPY.USDreg_model1, BRL.USDreg_model1, 
+          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, df = F, model.numbers = F, object.names=F, model.names = F, align = T, title = "Regressions crisis period", 
           notes = "\\parbox[t]{7cm}{Logistic regression. Dependent variable: an indicator varible ... AND Some very long and interesting comment.}")
 
 
 #NON-CRISIS TABLE
-stargazer(CHF.EURreg_model2, CHF.GBPreg_model2, CHF.USDreg_model2, CHF.JPYreg_model2, CHF.BRLreg_model2, CHF.INRreg_model2, CHF.NOKreg_model2, JPY.USDreg_model2, INR.USDreg_model2, BRL.USDreg_model2, 
-          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions non-crisis period")
-
-
+stargazer(CHF.EURreg_model2, CHF.GBPreg_model2, CHF.USDreg_model2, CHF.JPYreg_model2, CHF.BRLreg_model2, CHF.INRreg_model2, CHF.NOKreg_model2, JPY.USDreg_model2, BRL.USDreg_model2, 
+          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions non-crisis period")
 
 
 #EXPERIMENTAL THRESHOLD VALUE
 quantile(independent_comp1$VIX[which(independent_comp1$VIX>0)],0.25)*100
 #EXPERIMENTAL
 
-#Save Lambda and Sigma Parameters of Mixture
-comp1_list = list()
-comp2_list = list()
-for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
-  mix_object = normalmixEM(spot_rates_returns[1:5479, i], k = 2)
-  comp1_list[[i]] = c(mix_object$lambda[1], mix_object$sigma[1])
-  comp2_list[[i]] = c(mix_object$lambda[2], mix_object$sigma[2])
-  }
-final_table = do.call(rbind, Map(data.frame, A=comp1_list, B=comp2_list))
-colnames(final_table) = c("Component 1", "Component 2")
-row.names(final_table)[seq(1,20,2)] = paste0(row.names(final_table)[seq(1,20,2)], "lambda")
-row.names(final_table)[seq(2,20,2)] = paste(row.names(final_table)[seq(2,20,2)],"sigma")
-row.names(final_table) = gsub('[0-9]+', '', row.names(final_table))
-
-
-#treshold values in latex
+#threshold values in latex
 rel_thres = c( 'PUT.CALL', 'VIX', "VSTOXX", 'TED_SPREAD', 'GOLD', 'JPM_GLOBAL_FX_VOLA', 'BARC_US_CORP_HY_10')
 stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,]*100, CHF.GBP_threshold_vars[rel_thres,]*100, CHF.USD_threshold_vars[rel_thres,]*100, CHF.JPY_threshold_vars[rel_thres,]*100, CHF.BRL_threshold_vars[rel_thres,]*100, CHF.INR_threshold_vars[rel_thres,]*100,
                 CHF.NOK_threshold_vars[rel_thres,]*100, JPY.USD_threshold_vars[rel_thres,]*100, INR.USD_threshold_vars[rel_thres,]*100, BRL.USD_threshold_vars[rel_thres,]*100)
-          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, title = 'Treshold values')
+          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Treshold values')
 
 #threshold plot for CHF.EUR
 threshold_mix = normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)
@@ -254,7 +254,9 @@ for (i in colnames(daily_independent_returns[,2:ncol(daily_independent_returns)]
   threshold_plots[[i]] = threshold_plot
   ggsave(threshold_plot, file=paste0("threshold_", i,".png"), width = 14, height = 10, units = "cm")
 }
-i = "JPM_GLOBAL_FX_VOLA"
+
+
+#table of proportions of deviations from threshold
 length(which(independent_thresh1$JPM_GLOBAL_FX_VOLA>CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",1]))/nrow(independent_thresh1)
 length(which(independent_thresh1$JPM_GLOBAL_FX_VOLA<CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",2]))/nrow(independent_thresh1)
 
