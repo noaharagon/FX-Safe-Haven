@@ -145,6 +145,8 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   #split data into regimes to run separate regressions
   normalmix = normalmixEM(spot_rates_returns[1:5479, i])
   segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
+  
+  
   segmented$component = ifelse(normalmix$posterior[,1]<0.5, "1", "2")
   segmented$matching_col = as.Date(ifelse(segmented$component== "1", segmented$dates, 0))
   
@@ -178,13 +180,31 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   rm(normalmix, independent_comp1, independent_comp2, segmented, reg1, reg2)
 }
 
+
+#Rename component 1 as crisis and component 2 as business as usual
+for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD", "INR.USD")){
+  if(summary(get(paste0(i, "reg_model1_2000")))$fstatistic[3] > summary(get(paste0(i, "reg_model2_2000")))$fstatistic[3]){
+    
+    assign(paste0(i, "reg_model2"), get(paste0(i, "reg_model1_2000")))
+    assign(paste0(i, "reg_model1"), get(paste0(i, "reg_model2_2000")))
+  
+    }else { 
+      assign(paste0(i, "reg_model1"), get(paste0(i, "reg_model1_2000")))
+      assign(paste0(i, "reg_model2"), get(paste0(i, "reg_model2_2000")))
+    }
+rm(list = c(paste0(i, "reg_model1_2000"),paste0(i, "reg_model2_2000") ))
+    }
+
+
 #stargazer to create LaTeX table of results
-stargazer(CHF.EURreg_model1_2000, CHF.GBPreg_model1_2000, CHF.USDreg_model1_2000, CHF.JPYreg_model1_2000, CHF.BRLreg_model1_2000, CHF.INRreg_model1_2000, CHF.NOKreg_model1_2000, JPY.USDreg_model1_2000, INR.USDreg_model1_2000, BRL.USDreg_model1_2000, 
+#CRISIS TABLE
+stargazer(CHF.EURreg_model1, CHF.GBPreg_model1, CHF.USDreg_model1, CHF.JPYreg_model1, CHF.BRLreg_model1, CHF.INRreg_model1, CHF.NOKreg_model1, JPY.USDreg_model1, INR.USDreg_model1, BRL.USDreg_model1, 
+          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions crisis period", 
+          notes = "\\parbox[t]{7cm}{Logistic regression. Dependent variable: an indicator varible ... AND Some very long and interesting comment.}")
+
+#NON-CRISIS TABLE
+stargazer(CHF.EURreg_model2, CHF.GBPreg_model2, CHF.USDreg_model2, CHF.JPYreg_model2, CHF.BRLreg_model2, CHF.INRreg_model2, CHF.NOKreg_model2, JPY.USDreg_model2, INR.USDreg_model2, BRL.USDreg_model2, 
           column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions non-crisis period")
-
-stargazer(CHF.EURreg_model2_2000, CHF.GBPreg_model2_2000, CHF.USDreg_model2_2000, CHF.JPYreg_model2_2000, CHF.BRLreg_model2_2000, CHF.INRreg_model2_2000, CHF.NOKreg_model2_2000, JPY.USDreg_model2_2000, INR.USDreg_model2_2000, BRL.USDreg_model2_2000, 
-          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions crisis period")
-
 
 
 
