@@ -114,14 +114,7 @@ for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
 #plotting classification into "business as usual" and crisis
 significant_dates <- read.table(textConnection(
   "Date, Event
-2001-09-11, Terrorist Attack
-2004-03-11, Terrorist Attack
-2005-07-07, Terrorist Attack
-2010-05-06, Flash Crash
-2013-04-23, Flash Crash
-2015-01-15, SNB Floor
-2015-11-13, Terrorist Attack
-2017-05-22, Terrorist Attack"), sep=',', colClasses = c("Date", "character"), header=TRUE)
+2015-01-15, SNB Floor"), sep=',', colClasses = c("Date", "character"), header=TRUE)
 
 mixture_plots <- list("CHF.USD", "CHF.GBP", "CHF.EUR")
 mix_plots_list = list()
@@ -132,7 +125,7 @@ for (i in mixture_plots) {
   str1 <- paste0(toAssign, "<-", "ifelse(eval(parse(text = paste0(i, '_mix', '$posterior[, 1]')))<0.5, '2', '1')")
   eval(parse(text=str1))
   mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
-    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event)) +theme_economist_white(gray_bg = F)+
+    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event))+theme_economist_white(gray_bg = F)+
     ggtitle(" ") + labs(y = "Spot Rate Return", x= "", color = "") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
   mix_plots_list[[i]] = mix_plot
   ggsave(mix_plot, file=paste0("mixplot_", i,".png"), width = 14, height = 10, units = "cm")
