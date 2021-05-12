@@ -210,8 +210,17 @@ row.names(final_table)[seq(2,19,2)] = paste(row.names(final_table)[seq(2,19,2)],
 row.names(final_table) = gsub('[0-9]+', '', row.names(final_table))
 
 #Lambda and Ligma for Crisis Period
-table_crisis = rbind(final_table[seq(1,18,2),1], final_table[seq(2,19,2),1]) #first component
-table_normal = rbind(final_table[seq(1,18,2),2], final_table[seq(2,19,2),2]) #second component
+table_crisis = as.data.frame(rbind(final_table[seq(1,18,2),1], final_table[seq(2,19,2),1])) #first component
+names(table_crisis) = c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")
+row.names(table_crisis) = c('Lambda', "Sigma")
+table_normal = as.data.frame(rbind(final_table[seq(1,18,2),2], final_table[seq(2,19,2),2])) #second component
+names(table_normal) = c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")
+row.names(table_normal) = c('Lambda', "Sigma")
+
+#CREATE LAMBDA AND SIGMA LATEX TABLE
+stargazer(table_crisis, no.space = T, summary = F, title = 'Lambda and Sigma Parameter Gaussian Mixture')
+
+
 
 #stargazer to create LaTeX table of results
 #CRISIS TABLE
