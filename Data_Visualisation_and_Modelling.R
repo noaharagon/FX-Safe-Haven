@@ -74,9 +74,9 @@ rm(z)
 #summary statistics for spot returns
 summary_spot <- summarise_all(spot_rates_returns[,c("CHF.USD", "CHF.GBP", "CHF.EUR", "CHF.JPY")],
                                funs(min, mean, max, count = length))
-summary_spot_clean <- data.frame(min = c(summary_spot[1,1], summary_spot[1,2], summary_spot[1,3], summary_spot[1,4]),
-                            mean = c(summary_spot[1,5], summary_spot[1,6], summary_spot[1,7], summary_spot[1,8]),
-                            max = c(summary_spot[1,9], summary_spot[1,10], summary_spot[1,11], summary_spot[1,12]),
+summary_spot_clean <- data.frame(min = 100*c(summary_spot[1,1], summary_spot[1,2], summary_spot[1,3], summary_spot[1,4]),
+                            mean = 100*c(summary_spot[1,5], summary_spot[1,6], summary_spot[1,7], summary_spot[1,8]),
+                            max = 100*c(summary_spot[1,9], summary_spot[1,10], summary_spot[1,11], summary_spot[1,12]),
                             count = c(summary_spot[1,13], summary_spot[1,14], summary_spot[1,15], summary_spot[1,16]))
 rownames(summary_spot_clean) <- c("CHF.USD", "CHF.GBP", "CHF.EUR", "CHF.JPY")
 stargazer(summary_spot_clean, summary = F)
@@ -84,12 +84,12 @@ stargazer(summary_spot_clean, summary = F)
 #summary statistics for daily independent variables
 summary_independent <- summarise_all(daily_independent_returns[,c("PUT.CALL", "JPM_GLOBAL_FX_VOLA", "US_3M", "SPY")],
                                      funs(min, mean, max, count = length))
-summary_independent_clean <- data.frame(min = c(summary_independent[1,1], summary_independent[1,2], summary_independent[1,3], summary_independent[1,4]),
-                                 mean = c(summary_independent[1,5], summary_independent[1,6], summary_independent[1,7], summary_independent[1,8]),
-                                 max = c(summary_independent[1,9], summary_independent[1,10], summary_independent[1,11], summary_independent[1,12]),
+summary_independent_clean <- data.frame(min = 100*c(summary_independent[1,1], summary_independent[1,2], summary_independent[1,3], summary_independent[1,4]),
+                                 mean = 100*c(summary_independent[1,5], summary_independent[1,6], summary_independent[1,7], summary_independent[1,8]),
+                                 max = 100*c(summary_independent[1,9], summary_independent[1,10], summary_independent[1,11], summary_independent[1,12]),
                                  count = c(summary_independent[1,13], summary_independent[1,14], summary_independent[1,15], summary_independent[1,16]))
-rownames(summary_independent_clean) <- c("PUT.CALL", "JPM_VOLA", "US_3M", "SPY")
-stargazer(summary_independent_clean, summary = F)
+rownames(summary_independent_clean) <- c("Put Call Ratio", "JPM FX Vola", "US 3M T-Bill", "SP500")
+stargazer(rbind(summary_spot_clean,summary_independent_clean), summary = F, notes = "\\textit{Note:}", notes.align = "l")
 
 
 #histogram of FX returns
@@ -199,8 +199,9 @@ rm(list = c(paste0(i, "reg_model1_2000"),paste0(i, "reg_model2_2000") ))
 #stargazer to create LaTeX table of results
 #CRISIS TABLE
 stargazer(CHF.EURreg_model1, CHF.GBPreg_model1, CHF.USDreg_model1, CHF.JPYreg_model1, CHF.BRLreg_model1, CHF.INRreg_model1, CHF.NOKreg_model1, JPY.USDreg_model1, INR.USDreg_model1, BRL.USDreg_model1, 
-          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, title = "Regressions crisis period", 
+          column.labels=c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, df = F, model.numbers = F, object.names=F, model.names = F, align = T, title = "Regressions crisis period", 
           notes = "\\parbox[t]{7cm}{Logistic regression. Dependent variable: an indicator varible ... AND Some very long and interesting comment.}")
+
 
 #NON-CRISIS TABLE
 stargazer(CHF.EURreg_model2, CHF.GBPreg_model2, CHF.USDreg_model2, CHF.JPYreg_model2, CHF.BRLreg_model2, CHF.INRreg_model2, CHF.NOKreg_model2, JPY.USDreg_model2, INR.USDreg_model2, BRL.USDreg_model2, 
@@ -234,8 +235,31 @@ stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,]*100, CHF.GBP_threshold_vars[r
                 CHF.NOK_threshold_vars[rel_thres,]*100, JPY.USD_threshold_vars[rel_thres,]*100, INR.USD_threshold_vars[rel_thres,]*100, BRL.USD_threshold_vars[rel_thres,]*100)
           , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "INR/USD", "BRL/USD"), no.space = T, title = 'Treshold values')
 
+#threshold plot for CHF.EUR
+threshold_mix = normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)
+threshold_df = spot_rates_returns[,c("CHF.EUR", "dates")]
+threshold_df$component = ifelse(threshold_mix$posterior[,1]<0.5, '2', '1')
+threshold_df$matching_col = as.Date(ifelse(threshold_df$component== "1", threshold_df$dates, 0))
+threshold_plots = list()
+for (i in colnames(daily_independent_returns[,2:ncol(daily_independent_returns)])) {
+  independent_thresh1 = daily_independent_returns[which(threshold_df$matching_col == head(daily_independent_returns$dates,5479)), c(i, "dates")]
+  independent_thresh2 = daily_independent_returns[which(threshold_df$matching_col != head(daily_independent_returns$dates,5479)), c(i, "dates")]
+  independent_thresh1$component = 1
+  independent_thresh2$component = 2
+  final_thresh = rbind(independent_thresh1, independent_thresh2)
+  final_thresh = final_thresh[order(final_thresh$dates),]
+  threshold_plot = ggplot(data = final_thresh, aes(x = as.Date(dates), y = final_thresh[,1])) +
+    geom_point(color = factor(final_thresh$component), size = 1)+ geom_hline(yintercept = c(CHF.EUR_threshold_vars[i,1], CHF.EUR_threshold_vars[i,2]), color = "yellow") +theme_economist_white(gray_bg = F)+
+    ggtitle(i) + labs(y = "Return", x= "", color = "") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
+  threshold_plots[[i]] = threshold_plot
+  ggsave(threshold_plot, file=paste0("threshold_", i,".png"), width = 14, height = 10, units = "cm")
+}
+i = "JPM_GLOBAL_FX_VOLA"
+length(which(independent_thresh1$JPM_GLOBAL_FX_VOLA>CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",1]))/nrow(independent_thresh1)
+length(which(independent_thresh1$JPM_GLOBAL_FX_VOLA<CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",2]))/nrow(independent_thresh1)
 
-
+length(which(independent_thresh2$JPM_GLOBAL_FX_VOLA>CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",1]))/nrow(independent_thresh2)
+length(which(independent_thresh2$JPM_GLOBAL_FX_VOLA<CHF.EUR_threshold_vars["JPM_GLOBAL_FX_VOLA",2]))/nrow(independent_thresh2)
 
 
 #LaTeX Table Preparation

@@ -157,10 +157,11 @@ for (i in colnames(daily_independent)){
   print(max(x$lengths[x$values][x$lengths[x$values] != max(x$lengths[x$values])]))}
 rm(x,i)
 
-daily_independent = na.locf(daily_independent, na.rm = F)
-
 #replace ted spread with full time series since 2000
 daily_independent$`TED SPREAD RATE - MIDDLE RATE` = TEDRATE$TEDRATE
+
+daily_independent = na.locf(daily_independent, na.rm = F)
+
 
 #Create return datasets from independent variables
 daily_independent_returns = as.data.frame(sapply(daily_independent[2:ncol(daily_independent)], diffsimple))
