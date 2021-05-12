@@ -302,3 +302,4 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   #add independent threshold proportions per currency
   currency_thresh_list[[i]] = independent_var_thresh_list
 }
+
