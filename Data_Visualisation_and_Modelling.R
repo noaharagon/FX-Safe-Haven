@@ -241,10 +241,15 @@ quantile(independent_comp1$VIX[which(independent_comp1$VIX>0)],0.25)*100
 
 #threshold values in latex
 rel_thres = c( 'PUT.CALL', 'VIX', "VSTOXX", 'TED_SPREAD', 'GOLD', 'JPM_GLOBAL_FX_VOLA', 'BARC_US_CORP_HY_10')
-stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,]*100, CHF.GBP_threshold_vars[rel_thres,]*100, CHF.USD_threshold_vars[rel_thres,]*100, CHF.JPY_threshold_vars[rel_thres,]*100, CHF.BRL_threshold_vars[rel_thres,]*100, CHF.INR_threshold_vars[rel_thres,]*100,
-                CHF.NOK_threshold_vars[rel_thres,]*100, JPY.USD_threshold_vars[rel_thres,]*100, INR.USD_threshold_vars[rel_thres,]*100, BRL.USD_threshold_vars[rel_thres,]*100)
-          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Treshold values')
+stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,][,1]*100, CHF.GBP_threshold_vars[rel_thres,][,1]*100, CHF.USD_threshold_vars[rel_thres,][,1]*100, CHF.JPY_threshold_vars[rel_thres,][,1]*100, CHF.BRL_threshold_vars[rel_thres,][,1]*100, CHF.INR_threshold_vars[rel_thres,][,1]*100,
+                CHF.NOK_threshold_vars[rel_thres,][,1]*100, JPY.USD_threshold_vars[rel_thres,][,1]*100, BRL.USD_threshold_vars[rel_thres,][,1]*100)
+          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Positive Treshold Values')
 
+stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,][,2]*100, CHF.GBP_threshold_vars[rel_thres,][,2]*100, CHF.USD_threshold_vars[rel_thres,][,2]*100, CHF.JPY_threshold_vars[rel_thres,][,2]*100, CHF.BRL_threshold_vars[rel_thres,][,2]*100, CHF.INR_threshold_vars[rel_thres,][,2]*100,
+                CHF.NOK_threshold_vars[rel_thres,][,2]*100, JPY.USD_threshold_vars[rel_thres,][,2]*100, BRL.USD_threshold_vars[rel_thres,][,2]*100)
+          , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Negative Treshold Values')
+
+ 
 #threshold plot for CHF.EUR
 threshold_mix = normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)
 threshold_df = spot_rates_returns[,c("CHF.EUR", "dates")]
