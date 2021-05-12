@@ -218,7 +218,8 @@ names(table_normal) = c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "
 row.names(table_normal) = c('Lambda', "Sigma")
 
 #CREATE LAMBDA AND SIGMA LATEX TABLE
-stargazer(table_crisis, no.space = T, summary = F, title = 'Lambda and Sigma Parameter Gaussian Mixture')
+stargazer(table_crisis, no.space = T, summary = F, title = 'Lambda and Sigma Parameter Gaussian Mixture Crisis State')
+stargazer(table_normal, no.space = T, summary = F, title = 'Lambda and Sigma Parameter Gaussian Mixture Non-Crisis State')
 
 
 
