@@ -82,13 +82,13 @@ rownames(summary_spot_clean) <- c("CHF.USD", "CHF.GBP", "CHF.EUR", "CHF.JPY")
 stargazer(summary_spot_clean, summary = F)
 
 #summary statistics for daily independent variables
-summary_independent <- summarise_all(daily_independent_returns[,c("PUT.CALL", "JPM_GLOBAL_FX_VOLA", "US_3M", "SPY")],
+summary_independent <- summarise_all(daily_independent_returns[,c("PUT.CALL", "JPM_GLOBAL_FX_VOLA", "VSTOXX", "SPY")],
                                      funs(min, mean, max, count = length))
 summary_independent_clean <- data.frame(min = 100*c(summary_independent[1,1], summary_independent[1,2], summary_independent[1,3], summary_independent[1,4]),
                                  mean = 100*c(summary_independent[1,5], summary_independent[1,6], summary_independent[1,7], summary_independent[1,8]),
                                  max = 100*c(summary_independent[1,9], summary_independent[1,10], summary_independent[1,11], summary_independent[1,12]),
                                  count = c(summary_independent[1,13], summary_independent[1,14], summary_independent[1,15], summary_independent[1,16]))
-rownames(summary_independent_clean) <- c("Put Call Ratio", "JPM FX Vola", "US 3M T-Bill", "SP500")
+rownames(summary_independent_clean) <- c("Put Call Ratio", "JPM FX Vola", "VSTOXX", "SP500")
 stargazer(rbind(summary_spot_clean,summary_independent_clean), summary = F, no.space = T, notes = "\\textit{Note:}", notes.align = "l")
 
 
