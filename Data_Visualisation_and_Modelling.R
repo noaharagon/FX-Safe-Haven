@@ -24,7 +24,7 @@ Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice/Clean Dat
 names(Paths) = c("jonasschmitten", "noahangara")
 setwd(Paths[Sys.info()[7]])
 
-#Data 
+#Read in Data Prepared by Data_Cleaning.R
 bid_ask = read.csv('Bid_Ask_Clean.csv')
 spot_rates = read.csv('Spot_Rates_Clean.csv')
 spot_rates$dates <- as.Date(spot_rates$dates)
@@ -36,7 +36,7 @@ daily_independent_returns = read.csv('Daily_Independent_Returns_Clean.csv')
 
 #setting new working directory for graphs
 Paths = c("/Users/jonasschmitten/Desktop/FS 2021/Economics in Practice/Graphs", 
-          "/Users/noahangara/Documents/Master's/8th Semester/Economics in Practice")
+          "/Users/noahangara/Documents/Master's/8th Semester/Economics in Practice/Graphs")
 names(Paths) = c("jonasschmitten", "noahangara")
 setwd(Paths[Sys.info()[7]])
 
@@ -61,7 +61,7 @@ for (i in colnames(spot_rates[2:ncol(spot_rates)])) {
   g = ggplot(fortify(z,melt=T)) +
     geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, color = recessions.trim$Type, fill=recessions.trim$Type), alpha=0.5)+
     geom_line(aes(x=Index,y=Value))+ 
-    labs(y = "Spot Rate", x= "", color = "", fill = "") +     theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate", x= "", fill = "", color = "") + 
+    labs(y = "Spot Rate", x= "", color = "", fill = "") + theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate", x= "", fill = "", color = "") + 
     theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
           legend.box.margin=margin(-20,0, 0, 0)) + 
     scale_color_manual(values = c("1" = "black", "2" = "black")) + scale_fill_manual(values = c(" Euro-Crisis" = "#000099", " Recession" = "gray69"))
@@ -85,13 +85,13 @@ rownames(summary_spot_clean) <- c("CHF.USD", "CHF.GBP", "CHF.EUR", "CHF.JPY")
 stargazer(summary_spot_clean, summary = F)
 
 #summary statistics for daily independent variables
-summary_independent <- summarise_all(daily_independent_returns[,c("PUT.CALL", "JPM_GLOBAL_FX_VOLA", "VSTOXX", "SPY")],
+summary_independent <- summarise_all(daily_independent_returns[,c("PUT.CALL", "JPM_GLOBAL_FX_VOLA", "VSTOXX", "MSCI")],
                                      funs(min, mean, max, count = length))
 summary_independent_clean <- data.frame(min = 100*c(summary_independent[1,1], summary_independent[1,2], summary_independent[1,3], summary_independent[1,4]),
                                  mean = 100*c(summary_independent[1,5], summary_independent[1,6], summary_independent[1,7], summary_independent[1,8]),
                                  max = 100*c(summary_independent[1,9], summary_independent[1,10], summary_independent[1,11], summary_independent[1,12]),
                                  count = c(summary_independent[1,13], summary_independent[1,14], summary_independent[1,15], summary_independent[1,16]))
-rownames(summary_independent_clean) <- c("Put Call Ratio", "JPM FX Vola", "VSTOXX", "SP500")
+rownames(summary_independent_clean) <- c("Put Call Ratio", "JPM FX Vola", "VSTOXX", "MSCI")
 stargazer(rbind(summary_spot_clean,summary_independent_clean), summary = F, no.space = T, notes = "\\textit{Note:}", notes.align = "l")
 
 
@@ -145,7 +145,7 @@ for (i in mixture_plots) {
     theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate Return", x= "", fill = "", color = "") + 
     theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
           legend.box.margin=margin(-20,0, 0, 0)) + 
-    scale_color_manual(values = c("1" = "black", "2" = "black")) + scale_fill_manual(values = c(" Euro-Crisis" = "#000099", " Recession" = "gray69"))
+    scale_color_manual(values = c("2" = "black", "1" = "red")) + scale_fill_manual(values = c(" Euro-Crisis" = "#000099", " Recession" = "gray69"))
   ggsave(mix_plot, file=paste0("mixplot_", i,".png"), width = 14, height = 10, units = "cm")
   #significant dates (terrorist dates etc.)
   significant_dates_plot = ggplot()+ 
