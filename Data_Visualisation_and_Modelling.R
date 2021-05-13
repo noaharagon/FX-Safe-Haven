@@ -49,7 +49,8 @@ recessions.df = read.table(textConnection(
 1990-07-01, 1991-03-01, Recession
 2001-03-01, 2001-11-01, Recession
 2007-12-01, 2009-06-01, Recession
-2009-10-01, 2013-05-01, Euro-Crisis"), sep=',', colClasses=c('Date', 'Date', 'character'), header=TRUE)
+2009-10-01, 2013-05-01, Euro-Crisis
+2020-02-01, 2021-03-18, Recession"), sep=',', colClasses=c('Date', 'Date', 'character'), header=TRUE)
 recessions.trim = subset(recessions.df, Peak >= "2000-03-17")
 rm(recessions.df)
 
@@ -59,9 +60,11 @@ for (i in colnames(spot_rates[2:ncol(spot_rates)])) {
   z = zoo(spot_rates[, i], order.by = spot_rates$dates)
   g = ggplot(fortify(z,melt=T)) +
     geom_line(aes(x=Index,y=Value))+ 
-    geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, color = recessions.trim$Type, fill=recessions.trim$Type), alpha=0.2)+
-    labs(y = "Spot Rate", x= "", color = "", fill = "") + theme(legend.position = "bottom") +
-    theme_economist_white(gray_bg = F)
+    geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, color = recessions.trim$Type, fill=recessions.trim$Type), alpha=0.5)+
+    labs(y = "Spot Rate", x= "", color = "", fill = "") +     theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate", x= "", fill = "", color = "") + 
+    theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          legend.box.margin=margin(-20,0, 0, 0)) + 
+    scale_color_manual(values = c("1" = "black", "2" = "black")) + scale_fill_manual(values = c(" Euro-Crisis" = "#000099", " Recession" = "gray69"))
   plot_list[[i]] = g
   ggsave(g, file=paste0("plot_", i,".png"), width = 14, height = 10, units = "cm")
 }
@@ -97,7 +100,9 @@ hist_plots = list()
 for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
   n = ggplot(spot_rates_returns, aes(x=spot_rates_returns[,i])) +
   geom_histogram(color="black", fill="red", alpha = 0.5, bins = 100) +
-    geom_vline(xintercept = mean(spot_rates_returns[,i])) + theme_economist_white(gray_bg = F) + xlab("")
+    geom_vline(xintercept = mean(spot_rates_returns[,i])) + theme_economist_white(gray_bg = F) + xlab("") + 
+    theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          legend.box.margin=margin(-20,0, 0, 0))
   hist_plots[[i]] = n
   ggsave(n, file=paste0("hist_", i,".png"), width = 14, height = 10, units = "cm")
 }
@@ -106,29 +111,50 @@ for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
 qq_plots = list()
 for (i in colnames(spot_rates_returns[,2:ncol(spot_rates_returns)])) {
   j = ggplot(spot_rates_returns, aes(sample=spot_rates_returns[,i])) +
-  stat_qq(color = "red", alpha = 0.5) + stat_qq_line() + theme_economist_white(gray_bg = F)
+  stat_qq(color = "red", alpha = 0.5) + stat_qq_line() + theme_economist_white(gray_bg = F) + 
+    theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          legend.box.margin=margin(-20,0, 0, 0))
   qq_plots[[i]] <- j
   ggsave(j, file=paste0("qq_", i,".png"), width = 14, height = 10, units = "cm")
 }
 
-#plotting classification into "business as usual" and crisis
+#significant dates
 significant_dates <- read.table(textConnection(
-  "Date, Event
-2015-01-15, SNB Floor"), sep=',', colClasses = c("Date", "character"), header=TRUE)
+"Date, Event
+2001-09-11, Terrorist
+2004-03-11, Terrorist
+2005-07-07, Terrorist
+2010-05-06, Flash Crash
+2013-04-23, Flash Crash
+2015-01-15, SNB Floor
+2015-11-13, Terrorist
+2017-05-22, Terrorist"), sep=',', colClasses = c("Date", "character"), header=TRUE)
 
+#plots to show different components in spot returns with recession shading and significant dates
 mixture_plots <- list("CHF.USD", "CHF.GBP", "CHF.EUR")
-mix_plots_list = list()
 for (i in mixture_plots) {
   assign(paste0(i, "_mix"), normalmixEM(spot_rates_returns[1:5479, i], k = 2))
   assign(paste0(i, "_mix_df"), spot_rates_returns[,c(i, "dates")])
   toAssign <- paste0(i, "_mix_df", "[,'component']")
   str1 <- paste0(toAssign, "<-", "ifelse(eval(parse(text = paste0(i, '_mix', '$posterior[, 1]')))<0.5, '2', '1')")
   eval(parse(text=str1))
-  mix_plot = ggplot(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]"))))) +
-    geom_point(color = factor(eval(parse(text = paste0(i, "_mix_df[,3]")))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.5, aes(xintercept = significant_dates$Date, color = significant_dates$Event))+theme_economist_white(gray_bg = F)+
-    ggtitle(" ") + labs(y = "Spot Rate Return", x= "", color = "") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
-  mix_plots_list[[i]] = mix_plot
+  #recession shading
+  mix_plot = ggplot() +
+    geom_point(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]")))), color = eval(parse(text = paste0(i, "_mix_df[,3]"))), size = 1)+
+    geom_rect(data = recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, fill=recessions.trim$Type), alpha = 0.5)+ 
+    theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate Return", x= "", fill = "", color = "") + 
+    theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          legend.box.margin=margin(-20,0, 0, 0)) + 
+    scale_color_manual(values = c("1" = "black", "2" = "black")) + scale_fill_manual(values = c(" Euro-Crisis" = "#000099", " Recession" = "gray69"))
   ggsave(mix_plot, file=paste0("mixplot_", i,".png"), width = 14, height = 10, units = "cm")
+  #significant dates (terrorist dates etc.)
+  significant_dates_plot = ggplot()+ 
+    geom_point(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]")))), color = eval(parse(text = paste0(i, "_mix_df[,3]"))), size = 1)+ geom_vline(data = significant_dates, size = 1,alpha = 0.6, aes(xintercept = significant_dates$Date, color = significant_dates$Event))+
+    theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate Return", x= "", fill = "", color = "") + 
+    theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          legend.box.margin=margin(-20,0, 0, 0)) + 
+    scale_color_manual(values = c(" SNB Floor" = "#FF0000", " Terrorist" = "gray14", " Flash Crash" = "darkorchid"))
+  ggsave(significant_dates_plot, file=paste0("significantdateplot_", i,".png"), width = 14, height = 10, units = "cm")
 }
 
 # Finite Gaussian Mixture  ------------------------------------------------
