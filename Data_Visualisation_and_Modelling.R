@@ -59,8 +59,8 @@ plot_list = list()
 for (i in colnames(spot_rates[2:ncol(spot_rates)])) {
   z = zoo(spot_rates[, i], order.by = spot_rates$dates)
   g = ggplot(fortify(z,melt=T)) +
-    geom_line(aes(x=Index,y=Value))+ 
     geom_rect(data=recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, color = recessions.trim$Type, fill=recessions.trim$Type), alpha=0.5)+
+    geom_line(aes(x=Index,y=Value))+ 
     labs(y = "Spot Rate", x= "", color = "", fill = "") +     theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate", x= "", fill = "", color = "") + 
     theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
           legend.box.margin=margin(-20,0, 0, 0)) + 
@@ -140,8 +140,8 @@ for (i in mixture_plots) {
   eval(parse(text=str1))
   #recession shading
   mix_plot = ggplot() +
-    geom_point(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]")))), color = eval(parse(text = paste0(i, "_mix_df[,3]"))), size = 1)+
-    geom_rect(data = recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, fill=recessions.trim$Type), alpha = 0.5)+ 
+    geom_rect(data = recessions.trim, aes(xmin=Peak, xmax=Trough, ymin=-Inf, ymax=+Inf, fill=recessions.trim$Type), alpha = 0.5)+
+    geom_point(data = eval(parse(text = paste0(i, "_mix_df"))), aes(x = dates, y = eval(parse(text = paste0(i, "_mix_df[,1]")))), color = eval(parse(text = paste0(i, "_mix_df[,3]"))), size = 1)+ 
     theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "Spot Rate Return", x= "", fill = "", color = "") + 
     theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
           legend.box.margin=margin(-20,0, 0, 0)) + 
@@ -286,8 +286,10 @@ for (i in colnames(daily_independent_returns[,2:ncol(daily_independent_returns)]
   final_thresh = rbind(independent_thresh1, independent_thresh2)
   final_thresh = final_thresh[order(final_thresh$dates),]
   threshold_plot = ggplot(data = final_thresh, aes(x = as.Date(dates), y = final_thresh[,1])) +
-    geom_point(color = factor(final_thresh$component), size = 1)+ geom_hline(yintercept = c(CHF.EUR_threshold_vars[i,1], CHF.EUR_threshold_vars[i,2]), color = "yellow") +theme_economist_white(gray_bg = F)+
-    ggtitle(i) + labs(y = "Return", x= "", color = "") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) + scale_fill_economist()
+    geom_point(color = final_thresh$component, size = 1)+ geom_hline(yintercept = c(CHF.EUR_threshold_vars[i,1], CHF.EUR_threshold_vars[i,2]), color = "firebrick", size = 1.5) +theme_economist_white(gray_bg = F)+
+    ggtitle(i) + labs(y = "Return", x= "", color = "", title = "") + theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) +
+    theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          legend.box.margin=margin(-20,0, 0, 0))+ scale_color_manual(values = c("1" = "red", "2" = "black"))
   threshold_plots[[i]] = threshold_plot
   ggsave(threshold_plot, file=paste0("threshold_", i,".png"), width = 14, height = 10, units = "cm")
 }
