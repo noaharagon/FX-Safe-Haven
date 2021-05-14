@@ -71,6 +71,32 @@ for (i in colnames(spot_rates[2:ncol(spot_rates)])) {
 rm(i)
 rm(z)
 
+#plotting GDP expenditure side from SECO
+gdp <- read_excel("expendituregdp.xlsx")
+colnames(gdp)[4] = "Gov. Exp."
+gdp_line = gdp[,c(1,2)]
+gdp <- gdp[,-2]
+gdp$Imports = gdp$Imports*-1
+gdp = melt(gdp, "Year")
+gdpplot = ggplot(data = gdp, aes(x = gdp$Year, y = gdp$value, fill = gdp$variable))+ 
+  geom_bar(stat = "identity") + labs(x = "", y = "CHF (Millions)", fill = "") + scale_y_continuous(labels = comma)+theme_economist_white(gray_bg = F)+
+  theme(legend.position="bottom", legend.box="vertical", legend.box.margin=margin(-20,30, 0, 0),legend.key.width=unit(0.1,"cm"),
+        plot.title = element_text(hjust = 0.5), text = element_text(size = 10, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
+ggsave(gdpplot, file=paste0("gdpplot_", i,".png"), width = 14, height = 10, units = "cm")
+
+#plotting monthly SNB sight deposits 
+sight_deposits = read_excel("sightdeposits.xlsx")
+sight_deposits$Total = sight_deposits$`Liabilities - Sight deposits of domestic banks`+
+  sight_deposits$`Liabilities - Amounts due to the Confederation`+
+  sight_deposits$`Liabilities - Sight deposits of foreign banks and institutions`+
+  sight_deposits$`Liabilities - Other sight liabilities`
+sight_deposits$Overview = as.Date(paste(sight_deposits$Overview,"-01",sep=""))
+sight = ggplot(data = sight_deposits, aes(y = sight_deposits$Total, x = as.Date(sight_deposits$Overview)))+
+  geom_area(fill = "#7ca3c6")+ theme_economist_white(gray_bg = F)+ ggtitle(" ") + labs(y = "CHF (Millions)", x= "", fill = "", color = "") + 
+  theme(legend.position="bottom", plot.title = element_text(hjust = 0.5), text = element_text(size = 12, family = "Palatino"), axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        legend.box.margin=margin(-20,0, 0, 0)) + scale_y_continuous(labels = comma)
+ggsave(sight, file=paste0("sightdeposits_", i,".png"), width = 14, height = 10, units = "cm")
+
 
 # Data Exploration --------------------------------------------------------
 
