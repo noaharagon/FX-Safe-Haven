@@ -164,24 +164,20 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   #split data into regimes to run separate regressions
   normalmix = normalmixEM(spot_rates_returns[1:5479, i])
   segmented = as.data.frame(spot_rates_returns[1:5479, c(i, "dates")])
-  
+  #normalmixEM is not consistent in naming components, hene we need to check if it is consistent
   if(normalmix$lambda[1] > normalmix$lambda[2]){
     normalmix$posterior = normalmix$posterior[,c(2,1)]
   }
-  
+  #separate spot returns into component 1 and 2 via posterior likelihoods
   segmented$component = ifelse(normalmix$posterior[,1]<0.5, "1", "2")
   segmented$matching_col = as.Date(ifelse(segmented$component== "1", segmented$dates, 0))
-  
+  #separate independent vars into component 1 and 2
   reg1 = segmented[segmented$component == "1",]
   reg2 = segmented[segmented$component == "2",]
   independent_comp1 = daily_independent_returns[which(segmented$matching_col == head(daily_independent_returns$dates,5479)),]
   independent_comp2 = daily_independent_returns[which(segmented$matching_col != head(daily_independent_returns$dates,5479)),]
   
-  #to investigate state of "crisis" vs "business as usual" add stats on independent vars by mixture component
-  #assign(paste0(i, "_threshold_vars"), data.frame(comp1 = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x)max(x, na.rm = T)), 
-  #                                               comp2 = sapply(independent_comp2[,2:ncol(independent_comp2)], function(x)max(x, na.rm = T))))
-  
-  
+  #Analyse independent variables between the two componenets
   assign(paste0(i, "_threshold_vars"), data.frame(up1 = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) mean(x[which(x>0)],na.rm = T)), 
                                                   down1 = sapply(independent_comp1[,2:ncol(independent_comp1)], function(x) mean(x[which(x<0)],na.rm = T) )))
   
@@ -191,10 +187,10 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
     independent_comp1$Bid_ask = bid_ask[which(segmented$matching_col == bid_ask$Date), paste0("X.",i)]
     independent_comp2$Bid_ask = bid_ask[which(segmented$matching_col != bid_ask$Date), paste0("X.",i)]
   
-  #run regressions on each data set
+    #run regressions on each data set
     assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask,  data = independent_comp1))
     assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y + Bid_ask, data = independent_comp2))
-  
+
   } else {
     assign(paste0(i,"reg_model1_2000"), lm(formula = reg1[,i] ~ MSCI  + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y ,  data = independent_comp1))
     assign(paste0(i, 'reg_model2_2000'), lm(formula = reg2[,i] ~ MSCI + PUT.CALL  + MOVE_3M + VIX + VSTOXX + TED_SPREAD + GOLD +JPM_GLOBAL_FX_VOLA + X10Y_BREAKEVEN + BARC_US_CORP_HY_10Y , data = independent_comp2))
@@ -229,6 +225,7 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   comp1_list[[i]] = c(mix_object$lambda[1], mix_object$sigma[1])
   comp2_list[[i]] = c(mix_object$lambda[2], mix_object$sigma[2])
 }
+#format lambda and sigma into table to present results
 final_table = do.call(rbind, Map(data.frame, A=comp1_list, B=comp2_list))
 colnames(final_table) = c("Component 1", "Component 2")
 row.names(final_table)[seq(1,18,2)] = paste0(row.names(final_table)[seq(1,18,2)], "lambda")
@@ -272,7 +269,7 @@ stargazer(cbind(CHF.EUR_threshold_vars[rel_thres,][,2]*100, CHF.GBP_threshold_va
           , summary = F, column.labels = c("CHF/EUR","CHF/GBP", "CHF/USD", "CHF/JPY", "CHF/BRL", "CHF/INR", "CHF/NOK", "JPY/USD", "BRL/USD"), no.space = T, title = 'Negative Treshold Values')
 
  
-#threshold plot for CHF.EUR
+#threshold plot for all independent vars for CHF.EUR
 threshold_mix = normalmixEM(spot_rates_returns[1:5479, "CHF.EUR"], k = 2)
 threshold_df = spot_rates_returns[,c("CHF.EUR", "dates")]
 threshold_df$component = ifelse(threshold_mix$posterior[,1]<0.5, '2', '1')
@@ -300,10 +297,11 @@ currency_thresh_list = list()
 independent_var_thresh_list = list()
 for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "CHF.BRL", "JPY.USD", "BRL.USD")){
   proportion_mix = normalmixEM(spot_rates_returns[1:5479, i], k = 2)
-  #
+  #check for consistentcy in component naming again
   if(proportion_mix$lambda[1] > proportion_mix$lambda[2]){
     proportion_mix$posterior = proportion_mix$posterior[,c(2,1)]
   }
+  #separate spot and independent vars into components to pipe into proportion calculations below
   proportion_df = spot_rates_returns[,c(i, "dates")]
   proportion_df$component = ifelse(proportion_mix$posterior[,1]<0.5, '2', '1')
   proportion_df$matching_col = as.Date(ifelse(proportion_df$component== "1", proportion_df$dates, 0))
@@ -325,7 +323,7 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
     length(which(independent_thresh2[,j]>eval(parse(text = paste(i,"_threshold_vars", "[", paste("'",j,"'", sep = ""), ",1]", sep = "")))))/nrow(independent_thresh2),
     length(which(independent_thresh2[,j]<eval(parse(text = paste(i,"_threshold_vars", "[", paste("'",j,"'", sep = ""), ",2]", sep = "")))))/nrow(independent_thresh2)
     )
-    #add threshold proportions of all currencies
+    #add threshold proportions of all independent vars
     independent_var_thresh_list[[j]] = c(deviation_crisis, deviation_normal)
   }
   #add independent threshold proportions per currency
