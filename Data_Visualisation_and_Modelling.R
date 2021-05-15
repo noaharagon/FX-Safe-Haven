@@ -183,6 +183,21 @@ for (i in mixture_plots) {
   ggsave(significant_dates_plot, file=paste0("significantdateplot_", i,".png"), width = 14, height = 10, units = "cm")
 }
 
+CHF.NOK_plot = normalmixEM(spot_rates_returns[1:5479, 7], k = 2)
+sdnorm = function(x, mean=0, sd=1, lambda=1){lambda*dnorm(x, mean=mean, sd=sd)}
+ggplot(spot_rates_returns, aes(x = CHF.NOK)) + 
+  stat_function(fun = dnorm, 
+                args = list(mean = CHF.NOK_plot[["mu"]][[1]], 
+                            sd = CHF.NOK_plot[["sigma"]][[1]]), geom  = "area", alpha = 0.5, fill = "dodgerblue") +
+  stat_function(fun = dnorm, 
+                args = list(mean = CHF.NOK_plot[["mu"]][[2]], 
+                            sd = CHF.NOK_plot[["sigma"]][[2]]), geom = "area", alpha = 0.5, fill = "firebrick") + 
+  geom_line(data = data.frame(x = c(CHF.NOK_plot[["mu"]][[2]], CHF.NOK_plot[["mu"]][[2]]), y = c(0, 100)), aes(x = x , y = y), color = "firebrick4")  + 
+  geom_line(data = data.frame(x = c(CHF.NOK_plot[["mu"]][[1]], CHF.NOK_plot[["mu"]][[1]]), y = c(0, 100)), aes(x = x , y = y), color = "dodgerblue4") +
+  labs(x = "", y = "") +
+  theme_economist_white(gray_bg = F) + theme(text = element_text(size = 12, family = "Palatino"))
+
+
 # Finite Gaussian Mixture  ------------------------------------------------
 
 #state dependent regression models
@@ -355,4 +370,3 @@ for (i in c("CHF.EUR", "CHF.USD", "CHF.GBP", "CHF.JPY", "CHF.NOK", "CHF.INR", "C
   #add independent threshold proportions per currency
   currency_thresh_list[[i]] = independent_var_thresh_list
 }
-
