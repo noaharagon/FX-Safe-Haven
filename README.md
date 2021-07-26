@@ -6,5 +6,5 @@ This repository is for the HSG course "Economics in Practice". We were tasked wi
 ## Repository Structure:
 - `Data_Cleaning.R`: script to clean data extracted from Bloomberg and Eikon
 - `Data_Visualisation_and_Modelling.R`: script to fit Gaussian Mixture Model and visualise results
-- `report.pdf`: Final report outlining results
+- `2021 Schmitten, Angara Smooth Sailing? A Finite Gaussian Mixture Factor Model of What Makes Safe Haven Currencies.pdf`: Final report outlining results
 - `slides.pdf`: Presentation slides
